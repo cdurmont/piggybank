@@ -21,19 +21,16 @@ exports.create = (req, res, next) => {
 }
 
 
-exports.read = [
-
-    (req, res, next) => {
+exports.read = (req, res, next) => {
         UserService.read({},(err, users) => {
             if (err)
                 return next(err);
             res.json(users);
         });
     }
-]
 
-exports.update = [
-    (req, res, next) => {
+
+exports.update = (req, res, next) => {
         let user = new User({
             _id: req.params.id,
             login: req.body.login,
@@ -41,21 +38,18 @@ exports.update = [
         });
         if (req.body.hash)
             user.hash = req.body.hash;
-        UserService.update(user, (err, user) => {
+        UserService.update(user, (err) => {
             if (err)
                 return next(err);
             res.status(200).end();
         });
     }
-]
 
-exports.delete = [
-    // TODO add input sanitization
-    (req, res, next) => {
-        User.deleteOne({_id: req.params.id}, {}, (err) => {
+exports.delete = (req, res, next) => {
+        let user = new User({ _id: req.params.id });
+        UserService.delete(user,(err) => {
             if (err)
                 return next(err);
             res.status(200).end();
-        })
+        });
     }
-]

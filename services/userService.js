@@ -5,36 +5,6 @@ const uuid = require('uuid');
 const saltRounds = 10;
 
 const UserService = {
-    /**
-     * Updates a user.
-     * @param user
-     * @param callback
-     */
-    update(user, callback) {
-        // TODO add input sanitization
-        // allow modification of some fields only
-        let userUpdate = new User({
-            _id: user.id,
-            name: user.name,
-            login: user.login
-        });
-        // update callback : persist modifications
-        let updateCallback = (err, user) => {
-            if (!err)
-                User.updateOne({_id: user.id}, user, {}, callback);
-            else
-                callback(err, null);
-        };
-        // if a new password has been set for hash, salt&hash before updating
-        if (user.hash)
-        {
-            userUpdate.hash = user.hash;
-            this.saltHash(userUpdate, updateCallback);
-        }
-        else
-            updateCallback(null, user);
-
-    },
 
     /**
      * Creates a new user
@@ -75,6 +45,43 @@ const UserService = {
         User.find(filter, 'login name apikey')
             .exec(callback);
     },
+
+    /**
+     * Updates a user.
+     * @param user
+     * @param callback
+     */
+    update(user, callback) {
+        // TODO add input sanitization
+        // allow modification of some fields only
+        let userUpdate = new User({
+            _id: user.id,
+            name: user.name,
+            login: user.login
+        });
+        // update callback : persist modifications
+        let updateCallback = (err, user) => {
+            if (!err)
+                User.updateOne({_id: user.id}, user, {}, callback);
+            else
+                callback(err, null);
+        };
+        // if a new password has been set for hash, salt&hash before updating
+        if (user.hash)
+        {
+            userUpdate.hash = user.hash;
+            this.saltHash(userUpdate, updateCallback);
+        }
+        else
+            updateCallback(null, user);
+
+    },
+
+    delete(user, callback) {
+        User.deleteOne({_id: user.id}, {}, callback);
+    },
+
+    // utilities
 
     saltHash(user, callback) {
         bcrypt.genSalt(saltRounds, function (err, salt) {
