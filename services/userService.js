@@ -57,7 +57,8 @@ const UserService = {
         let userUpdate = new User({
             _id: user.id,
             name: user.name,
-            login: user.login
+            login: user.login,
+            admin: user.admin
         });
         // update callback : persist modifications
         let updateCallback = (err, user) => {
@@ -79,6 +80,36 @@ const UserService = {
 
     delete(user, callback) {
         User.deleteOne({_id: user.id}, {}, callback);
+    },
+
+    /**
+     * Logs a user in. If successful returns full User instance, including apikey for further calls
+     * @param user (login and password (set in the hash field))
+     * @param callback (err, result:User[])
+     */
+    login(user, callback) {
+        User.findOne({login: user.login}, 'login salt hash name apikey admin', (err, userDB) => {
+           if (err)
+               callback(err);
+           else
+           {
+               // hash password and compare
+               bcrypt.hash(user.hash, userDB.salt, (err, hash) => {
+                   if (err)
+                       callback(err);
+                   else
+                       if (hash === userDB.hash)
+                       {
+                           // password is valid, logging in...
+                           userDB.salt = null;  // ... but keep salt&hash secret
+                           userDB.hash = null;
+                           callback(null, userDB);
+                       }
+                       else
+                           callback();  // no error, no user = invalid user or password
+               });
+           }
+        });
     },
 
     // utilities
