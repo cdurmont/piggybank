@@ -85,32 +85,37 @@ const UserService = {
     /**
      * Logs a user in. If successful returns full User instance, including apikey for further calls
      * @param user (login and password (set in the hash field))
-     * @param callback (err, result:User[])
+     * @param callback (err, result:User)
      */
     login(user, callback) {
         User.findOne({login: user.login}, 'login salt hash name apikey admin', (err, userDB) => {
            if (err)
-               callback(err);
-           else
-           {
-               // hash password and compare
-               bcrypt.hash(user.hash, userDB.salt, (err, hash) => {
-                   if (err)
-                       callback(err);
-                   else
-                       if (hash === userDB.hash)
-                       {
-                           // password is valid, logging in...
-                           userDB.salt = null;  // ... but keep salt&hash secret
-                           userDB.hash = null;
-                           callback(null, userDB);
-                       }
-                       else
-                           callback();  // no error, no user = invalid user or password
-               });
-           }
+               return callback(err);
+           // hash password and compare
+           bcrypt.hash(user.hash, userDB.salt, (err, hash) => {
+               if (err)
+                   return callback(err);
+               if (hash === userDB.hash)
+               {
+                   // password is valid, logging in...
+                   userDB.salt = null;  // ... but keep salt&hash secret
+                   userDB.hash = null;
+                   return callback(null, userDB);
+               }
+               return callback();  // no error, no user = invalid user or password
+           });
         });
     },
+
+    /**
+     * Authenticate user via apikey
+     * @param apikey the apikey to authenticate against
+     * @param callback (err, result:User)
+     */
+    loginApikey(apikey, callback) {
+        User.findOne({apikey: apikey}, 'login name apikey admin', callback);
+    },
+
 
     // utilities
 

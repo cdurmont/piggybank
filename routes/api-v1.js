@@ -17,12 +17,12 @@ router.post('/login',
             });
 
 // Users CRUD
-router.post('/users', userController.create);
-router.get('/users', userController.read);
-router.put('/users/:id', userController.update);
-router.delete('/users/:id', userController.delete);
+router.post('/users', passport.authenticate('localapikey', {session: false}), userController.create);
+router.get('/users', passport.authenticate('localapikey', {session: false}), userController.read);
+router.put('/users/:id', passport.authenticate('localapikey', {session: false}), userController.update);
+router.delete('/users/:id', passport.authenticate('localapikey', {session: false}), userController.delete);
 
-router.get('/users/:id', (req, res) => {
+router.get('/users/:id', passport.authenticate('localapikey', {session: false}), (req, res) => {
     // TODO read user by id
     res.send('Not implemented : read user');
 })

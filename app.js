@@ -7,6 +7,7 @@ const passport = require('passport');
 
 const config = require('./config/config');
 const loginStrategy = require('./config/security/loginStrategy');
+const apiStrategy = require('./config/security/apiStrategy');
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // authentication setup
 passport.use(loginStrategy);
+passport.use(apiStrategy);
 
 
 // Route definitions
