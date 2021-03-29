@@ -13,7 +13,6 @@ const UserService = {
      */
     create(newUser, callback) {
         // TODO check for duplicates
-        // TODO validation
         this.saltHash(newUser, (err, newUser) => {
             if (err)
             {
