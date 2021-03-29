@@ -1,3 +1,4 @@
+Account = require('../models/account');
 
 
 const AccountService = {
@@ -5,9 +6,10 @@ const AccountService = {
     create: function (account, callback) {
         account.save(callback);
     },
-    
-    read: function (accountFilter, callback) {
 
+    read: function (accountFilter, callback) {
+        Account.find(accountFilter)
+            .exec(callback);
     }
 };
 

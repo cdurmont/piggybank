@@ -6,7 +6,7 @@ const AccountSchema = new Schema({
     externalRef: {type: String, maxlength: 100, required: false},
     iban: {type: String, maxlength: 34, required: false},
     parent: {type: Schema.Types.ObjectId, ref: 'Account', required: false},
-    system: {type: Boolean, required: true, default: false}
+    type: {type: String, required: true, enum: ['S', 'U']}    // type = System ou User-defined
 });
 
 module.exports = mongoose.model('Account', AccountSchema);
