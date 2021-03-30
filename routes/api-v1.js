@@ -32,5 +32,6 @@ router.get('/users/:id', passport.authenticate('localapikey', {session: false}),
 
 router.post('/accounts', passport.authenticate('localapikey', {session: false}), AccountController.create);
 router.get('/accounts', passport.authenticate('localapikey', {session: false}), AccountController.read);
+router.put('/accounts/:id', passport.authenticate('localapikey', {session: false}), AccountController.update);
 
 module.exports = router;
