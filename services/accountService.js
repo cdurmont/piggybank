@@ -22,6 +22,21 @@ const AccountService = {
         });
 
         Account.updateOne({_id: account._id}, accountUpdate, {}, callback);
+    },
+
+    delete: function (account, callback) {
+        // check if account has sub-accounts
+        let subAccount = {
+            parent: account._id
+        };
+        this.read(subAccount, (err, subAccounts) => {
+            if (err)
+                return callback(err);
+            if (subAccounts && subAccounts.length > 0)
+                return callback({error: 'Cannot delete account with sub-accounts'});
+            Account.deleteOne({_id: account._id}, {}, callback);
+        });
+
     }
 };
 
