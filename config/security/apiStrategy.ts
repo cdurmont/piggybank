@@ -1,8 +1,8 @@
-const LocalAPIKeyStrategy = require('passport-localapikey').Strategy;
+import {Strategy} from 'passport-localapikey';
 
-const UserService = require('../../services/userService');
+import UserService from '../../services/userService';
 
-const apiStrategy = new LocalAPIKeyStrategy(
+const apiStrategy = new Strategy(
     function(apikey, done) {
         UserService.loginApikey(apikey, function (err, user) {
             if (err) { return done(err); }
@@ -12,4 +12,4 @@ const apiStrategy = new LocalAPIKeyStrategy(
     }
 )
 
-module.exports = apiStrategy;
+export default apiStrategy;

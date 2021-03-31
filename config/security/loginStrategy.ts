@@ -1,7 +1,6 @@
-const BasicStrategy = require('passport-http').BasicStrategy;
-
-const UserService = require('../../services/userService');
-const User = require('../../models/user');
+import {BasicStrategy} from 'passport-http';
+import UserService from '../../services/userService';
+import User from '../../models/user';
 
 const loginStrategy = new BasicStrategy(
     function(username, password, done) {
@@ -19,4 +18,4 @@ const loginStrategy = new BasicStrategy(
     }
 );
 
-module.exports = loginStrategy;
+export default loginStrategy;

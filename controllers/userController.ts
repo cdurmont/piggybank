@@ -1,15 +1,16 @@
-const User = require('../models/user');
-const UserService = require('../services/userService');
+import User from '../models/user';
+import UserService from '../services/userService';
+import IUser from "../models/IUser";
+import {Request, Response} from 'express';
 
 const UserController = {
-    create: (req, res) => {
-
-        let newUser = new User({
-            login: req.body.login,
-            name: req.body.name,
-            hash: req.body.password,
-            admin: req.body.admin
-        });
+    create: (req: Request, res: Response) => {
+        let newUser:IUser = {
+            login: req.body["login"],
+            name: req.body["name"],
+            hash: req.body["password"],
+            admin: req.body["admin"]
+        };
 
         UserService.create(newUser, function (err, result) {
             if (err) {
@@ -21,7 +22,7 @@ const UserController = {
 
     },
 
-    read: (req, res) => {
+    read: (req: Request, res: Response) => {
         UserService.read({}, (err, users) => {
             if (err) {
                 console.error('Error reading user list');
@@ -31,13 +32,13 @@ const UserController = {
         });
     },
 
-    update: (req, res) => {
-        let user = new User({
+    update: (req: Request, res: Response) => {
+        let user:IUser = {
             _id: req.params.id,
             login: req.body.login,
             name: req.body.name,
             admin: req.body.admin
-        });
+        };
         if (req.body.hash)
             user.hash = req.body.hash;
         UserService.update(user, (err) => {
@@ -49,7 +50,7 @@ const UserController = {
         });
     },
 
-    delete: (req, res) => {
+    delete: (req: Request, res: Response) => {
         let user = new User({_id: req.params.id});
         UserService.delete(user, (err) => {
             if (err) {
@@ -62,4 +63,4 @@ const UserController = {
 }
 
 
-module.exports = UserController;
+export default UserController;

@@ -1,9 +1,9 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const passport = require('passport');
+import passport from 'passport';
 
-const UserController = require('../controllers/userController');
-const AccountController = require('../controllers/accountController');
+import UserController from '../controllers/userController';
+import AccountController from '../controllers/accountController';
 
 // API version
 router.get('/version', (req, res) => {
@@ -14,7 +14,7 @@ router.get('/version', (req, res) => {
 router.post('/login',
             passport.authenticate('basic', {session: false}),
             (req, res) => {
-                res.json(req.user);
+                res.json(req['user']);
             });
 
 // Users CRUD
@@ -35,4 +35,4 @@ router.get('/accounts', passport.authenticate('localapikey', {session: false}), 
 router.put('/accounts/:id', passport.authenticate('localapikey', {session: false}), AccountController.update);
 router.delete('/accounts/:id', passport.authenticate('localapikey', {session: false}), AccountController.delete);
 
-module.exports = router;
+export default router;

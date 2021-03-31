@@ -1,6 +1,8 @@
-const User = require('../models/user');
-const bcrypt = require('bcrypt');
-const uuid = require('uuid');
+import User from '../models/user';
+import bcrypt from 'bcrypt';
+import uuid from 'uuid';
+import IUser from "../models/IUser";
+import {NativeError} from "mongoose";
 
 const saltRounds = 10;
 
@@ -11,7 +13,7 @@ const UserService = {
      * @param newUser User to create. Put password in the hash field, it will be salted and hashed upon saving
      * @param callback (err, result:User)
      */
-    create(newUser, callback) {
+    create(newUser: IUser, callback: (err: object, user: IUser) => void) {
         // TODO check for duplicates
         this.saltHash(newUser, (err, newUser) => {
             if (err)
@@ -22,14 +24,15 @@ const UserService = {
             {
                 // persist user
                 newUser.apikey = uuid.v4();
-                newUser.save((err) => {
+                let newUserModel = new User(newUser);
+                newUserModel.save((err) => {
                     if (err) {
                         console.log('Error saving user ' + newUser);
-                        return callback(err);
+                        return callback(err, null);
                     }
-                    newUser.salt = null;
-                    newUser.hash = null;
-                    callback(null, newUser);
+                    newUserModel.salt = null;
+                    newUserModel.hash = null;
+                    callback(null, newUserModel);
                 });
             }
         });
@@ -40,7 +43,7 @@ const UserService = {
      * @param filter not implemented !
      * @param callback (err, result:User[])
      */
-    read(filter, callback) {
+    read(filter: IUser, callback: (err: object, userList: IUser[]) => void) {
         User.find(filter, 'login name apikey')
             .exec(callback);
     },
@@ -50,19 +53,19 @@ const UserService = {
      * @param user
      * @param callback
      */
-    update(user, callback) {
+    update(user: IUser, callback: (err: object, user: IUser) => void) {
         // TODO add input sanitization
         // allow modification of some fields only
         let userUpdate = new User({
-            _id: user.id,
+            _id: user._id,
             name: user.name,
             login: user.login,
             admin: user.admin
         });
         // update callback : persist modifications
-        let updateCallback = (err, user) => {
+        let updateCallback = (err: object, user: IUser) => {
             if (!err)
-                User.updateOne({_id: user.id}, user, {}, callback);
+                User.updateOne({_id: user._id}, user, {}, callback);
             else
                 callback(err, null);
         };
@@ -77,8 +80,8 @@ const UserService = {
 
     },
 
-    delete(user, callback) {
-        User.deleteOne({_id: user.id}, {}, callback);
+    delete(user: IUser, callback: (err: object) => void) {
+        User.deleteOne({_id: user._id}, {}, callback);
     },
 
     /**
@@ -87,7 +90,7 @@ const UserService = {
      * @param callback (err, result:User)
      */
     login(user, callback) {
-        User.findOne({login: user.login}, 'login salt hash name apikey admin', (err, userDB) => {
+        User.findOne({login: user.login}, 'login salt hash name apikey admin', {},(err, userDB) => {
            if (err)
                return callback(err);
            // hash password and compare
@@ -111,8 +114,8 @@ const UserService = {
      * @param apikey the apikey to authenticate against
      * @param callback (err, result:User)
      */
-    loginApikey(apikey, callback) {
-        User.findOne({apikey: apikey}, 'login name apikey admin', callback);
+    loginApikey(apikey: string, callback: (err: NativeError, user:IUser) => void ) {
+        User.findOne({apikey: apikey}, 'login name apikey admin', {}, callback);
     },
 
 
@@ -134,4 +137,4 @@ const UserService = {
     }
 }
 
-module.exports = UserService;
+export default UserService;
