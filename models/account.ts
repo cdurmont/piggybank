@@ -1,4 +1,5 @@
-const mongoose = require('mongoose');
+import * as mongoose from 'mongoose';
+import IAccount from "./IAccount";
 const Schema = mongoose.Schema;
 
 const AccountSchema = new Schema({
@@ -9,4 +10,4 @@ const AccountSchema = new Schema({
     type: {type: String, required: true, enum: ['S', 'U']}    // type = System ou User-defined
 });
 
-module.exports = mongoose.model('Account', AccountSchema);
+export default mongoose.model<IAccount & mongoose.Document>('Account', AccountSchema);

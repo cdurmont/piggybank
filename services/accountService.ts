@@ -1,18 +1,20 @@
-Account = require('../models/account');
-
+import Account from '../models/account';
+import IAccount from "../models/IAccount";
+import {NativeError} from "mongoose";
 
 const AccountService = {
 
-    create: function (account, callback) {
-        account.save(callback);
+    create: function (account: IAccount, callback: (err:NativeError, account: IAccount) => void) {
+        let accountModel = new Account(account);
+        accountModel.save(callback);
     },
 
-    read: function (accountFilter, callback) {
+    read: function (accountFilter: IAccount, callback: (err:NativeError, accountList: IAccount[]) => void) {
         Account.find(accountFilter)
             .exec(callback);
     },
 
-    update: function (account, callback) {
+    update: function (account: IAccount, callback: (err:NativeError, account: IAccount) => void) {
         let accountUpdate = new Account({
             _id: account._id,
             name: account.name,
@@ -24,20 +26,20 @@ const AccountService = {
         Account.updateOne({_id: account._id}, accountUpdate, {}, callback);
     },
 
-    delete: function (account, callback) {
+    delete: function (account: IAccount, callback: (err:NativeError) => void) {
         // check if account has sub-accounts
-        let subAccount = {
+        let subAccount: IAccount = {
             parent: account._id
         };
         this.read(subAccount, (err, subAccounts) => {
             if (err)
                 return callback(err);
             if (subAccounts && subAccounts.length > 0)
-                return callback({error: 'Cannot delete account with sub-accounts'});
+                return callback(new NativeError('Cannot delete account with sub-accounts'));
             Account.deleteOne({_id: account._id}, {}, callback);
         });
 
     }
 };
 
-module.exports = AccountService;
+export default AccountService;
