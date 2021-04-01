@@ -1,4 +1,5 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
+import IEntry from "./IEntry";
 const Schema = mongoose.Schema;
 
 const EntrySchema = new Schema({
@@ -11,4 +12,4 @@ const EntrySchema = new Schema({
     description:    {type: String, maxlength: 200}
 });
 
-module.exports = mongoose.model('Entry', EntrySchema);
+export default mongoose.model<IEntry & mongoose.Document>('Entry', EntrySchema);

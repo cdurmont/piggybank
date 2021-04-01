@@ -1,4 +1,5 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
+import IPermission from "./IPermission";
 const Schema = mongoose.Schema;
 
 const PermissionSchema = new Schema({
@@ -7,4 +8,4 @@ const PermissionSchema = new Schema({
     type:       {type: String, enum: ['R','W'], required: true, default: 'W'}
 });
 
-module.exports = mongoose.model('Permission', PermissionSchema);
+export default mongoose.model<IPermission & mongoose.Document>('Permission', PermissionSchema);
