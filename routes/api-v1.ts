@@ -4,6 +4,7 @@ import passport from 'passport';
 
 import UserController from '../controllers/userController';
 import AccountController from '../controllers/accountController';
+import TransactionController from "../controllers/transactionController";
 
 // API version
 router.get('/version', (req, res) => {
@@ -34,5 +35,14 @@ router.post('/accounts', passport.authenticate('localapikey', {session: false}),
 router.get('/accounts', passport.authenticate('localapikey', {session: false}), AccountController.read);
 router.put('/accounts/:id', passport.authenticate('localapikey', {session: false}), AccountController.update);
 router.delete('/accounts/:id', passport.authenticate('localapikey', {session: false}), AccountController.delete);
+
+
+// Transactions CRUD
+
+router.post('/transactions', passport.authenticate('localapikey', {session: false}), TransactionController.create);
+router.get('/transactions', passport.authenticate('localapikey', {session: false}), TransactionController.read);
+router.put('/transactions/:id', passport.authenticate('localapikey', {session: false}), TransactionController.update);
+router.delete('/transactions/:id', passport.authenticate('localapikey', {session: false}), TransactionController.delete);
+
 
 export default router;
