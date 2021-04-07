@@ -1,6 +1,6 @@
 import User from '../models/user';
 import bcrypt from 'bcrypt';
-import uuid from 'uuid';
+import {v4} from 'uuid';
 import IUser from "../models/IUser";
 import {NativeError} from "mongoose";
 
@@ -23,7 +23,7 @@ const UserService = {
             else
             {
                 // persist user
-                newUser.apikey = uuid.v4();
+                newUser.apikey = v4();
                 let newUserModel = new User(newUser);
                 newUserModel.save((err) => {
                     if (err) {

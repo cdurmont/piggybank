@@ -2,15 +2,14 @@ import User from '../models/user';
 import UserService from '../services/userService';
 import IUser from "../models/IUser";
 import {Request, Response} from 'express';
+import validator from "../config/validator";
 
 const UserController = {
     create: (req: Request, res: Response) => {
-        let newUser:IUser = {
-            login: req.body["login"],
-            name: req.body["name"],
-            hash: req.body["password"],
-            admin: req.body["admin"]
-        };
+
+        if (!validator.getSchema<IUser>('user')(req.body))
+            return res.status(400).json({error: 'Invalid User JSON'});
+        let newUser:IUser = req.body;
 
         UserService.create(newUser, function (err, result) {
             if (err) {
@@ -33,14 +32,11 @@ const UserController = {
     },
 
     update: (req: Request, res: Response) => {
-        let user:IUser = {
-            _id: req.params.id,
-            login: req.body.login,
-            name: req.body.name,
-            admin: req.body.admin
-        };
-        if (req.body.hash)
-            user.hash = req.body.hash;
+        if (!validator.getSchema<IUser>('user')(req.body))
+            return res.status(400).json({error: 'Invalid User JSON'});
+        let user:IUser = req.body;
+        user._id = req.params.id;
+
         UserService.update(user, (err) => {
             if (err) {
                 console.error('Error updating user ' + user);
@@ -51,6 +47,7 @@ const UserController = {
     },
 
     delete: (req: Request, res: Response) => {
+
         let user = new User({_id: req.params.id});
         UserService.delete(user, (err) => {
             if (err) {

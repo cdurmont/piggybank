@@ -1,0 +1,23 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "properties": {
+        "_id": {
+        },
+        "externalRef": {
+            "type": "string"
+        },
+        "iban": {
+            "type": "string"
+        },
+        "name": {
+            "type": "string"
+        },
+        "parent": {
+        },
+        "type": {
+            "type": "string"
+        }
+    },
+    "type": "object"
+}
+

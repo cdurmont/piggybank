@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "_id": {
+    },
+    "admin": {
+      "type": "boolean"
+    },
+    "apikey": {
+      "type": "string"
+    },
+    "displayName": {
+      "type": "string"
+    },
+    "hash": {
+      "type": "string"
+    },
+    "login": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "salt": {
+      "type": "string"
+    }
+  },
+  "type": "object"
+}
+
