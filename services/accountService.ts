@@ -10,6 +10,9 @@ const AccountService = {
     },
 
     read: function (accountFilter: IAccount, callback: (err:NativeError, accountList: IAccount[]) => void) {
+        // add support for querying accounts with no parent : use parent: {} as filter
+        if (accountFilter && accountFilter.parent && Object.keys(accountFilter.parent).length === 0)    // checking an empty object is fun in js ;)
+            accountFilter.parent = null;
         Account.find(accountFilter)
             .exec(callback);
     },

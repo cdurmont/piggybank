@@ -2,17 +2,15 @@ import Account from '../models/account';
 import AccountService from '../services/accountService';
 import {Request, Response} from 'express';
 import IAccount from "../models/IAccount";
+import validator from "../config/validator";
 
 const AccountController = {
 
     create: (req: Request, res: Response) => {
-        let account:IAccount = {
-            name: req.body.name,
-            externalRef: req.body.externalRef,
-            iban: req.body.iban,
-            type: req.body.type,
-            parent: req.body.parent === 'null' ? null : req.body.parent
-        };
+
+        if (!validator.getSchema<IAccount>('account')(req.body))
+            return res.status(400).json({error: 'Invalid Account JSON'});
+        let account:IAccount = req.body;
 
         AccountService.create(account, (err, newAccount) => {
             if (err) {
@@ -24,8 +22,9 @@ const AccountController = {
     },
 
     read: (req: Request, res: Response) => {
-        let account:IAccount = AccountController.initAccount(req);
-        if (req.body.id) account._id = req.body.id;
+        if (!validator.getSchema<IAccount>('account')(req.body))
+            return res.status(400).json({error: 'Invalid Account JSON'});
+        let account:IAccount = req.body;
 
         AccountService.read(account, (err, accounts) => {
             if (err) {
@@ -37,7 +36,10 @@ const AccountController = {
     },
 
     update: (req: Request, res: Response) => {
-        let account:IAccount = AccountController.initAccount(req);
+        if (!validator.getSchema<IAccount>('account')(req.body))
+            return res.status(400).json({error: 'Invalid Account JSON'});
+        let account:IAccount = req.body;
+
         if (req.params.id)
             account._id = req.params.id;
         else
