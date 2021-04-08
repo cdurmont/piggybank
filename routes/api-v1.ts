@@ -5,6 +5,7 @@ import passport from 'passport';
 import UserController from '../controllers/userController';
 import AccountController from '../controllers/accountController';
 import TransactionController from "../controllers/transactionController";
+import EntryController from "../controllers/entryController";
 
 // API version
 router.get('/version', (req, res) => {
@@ -43,6 +44,14 @@ router.post('/transactions', passport.authenticate('localapikey', {session: fals
 router.get('/transactions', passport.authenticate('localapikey', {session: false}), TransactionController.read);
 router.put('/transactions/:id', passport.authenticate('localapikey', {session: false}), TransactionController.update);
 router.delete('/transactions/:id', passport.authenticate('localapikey', {session: false}), TransactionController.delete);
+
+
+// Entries CRUD
+
+router.post('/entries', passport.authenticate('localapikey', {session: false}), EntryController.create);
+router.get('/entries', passport.authenticate('localapikey', {session: false}), EntryController.read);
+router.put('/entries/:id', passport.authenticate('localapikey', {session: false}), EntryController.update);
+router.delete('/entries/:id', passport.authenticate('localapikey', {session: false}), EntryController.delete);
 
 
 export default router;

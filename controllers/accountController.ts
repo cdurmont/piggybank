@@ -66,17 +66,8 @@ const AccountController = {
             }
             res.status(200).end();
         });
-    },
-
-    initAccount: (req: Request): IAccount => {
-        let account:IAccount = {};
-        if (req.body.name) account.name = req.body.name;
-        if (req.body.iban) account.iban = req.body.iban;
-        if (req.body.externalRef) account.externalRef = req.body.externalRef;
-        if (req.body.type) account.type = req.body.type;
-        if (req.body.parent) account.parent = req.body.parent === 'null' ? null : req.body.parent
-        return account;
     }
+
 };
 
 export default AccountController;
