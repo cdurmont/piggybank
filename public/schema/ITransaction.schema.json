@@ -1,0 +1,16 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "ITransaction": {
+            "properties": {
+                "_id": {
+                },
+                "balanced": {
+                    "type": "boolean"
+                }
+            },
+            "type": "object"
+        }
+    }
+}
+

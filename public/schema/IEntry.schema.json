@@ -1,0 +1,36 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "IEntry.schema.json",
+    "definitions": {
+        "IEntry": {
+            "properties": {
+                "_id": {
+                },
+                "account": {
+                    "$ref": "IAccount.schema.json"
+                },
+                "credit": {
+                    "type": "number"
+                },
+                "date": {
+                    "format": "date-time",
+                    "type": "string"
+                },
+                "debit": {
+                    "type": "number"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "reference": {
+                    "type": "string"
+                },
+                "transaction": {
+                    "$ref": "ITransaction.schema.json"
+                }
+            },
+            "type": "object"
+        }
+    }
+}
+
