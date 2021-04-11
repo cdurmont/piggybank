@@ -7,6 +7,15 @@
                 },
                 "balanced": {
                     "type": "boolean"
+                },
+                "entries": {
+                    "items": [
+                        {
+                            "$ref": "IEntry.schema.json"
+                        }
+                    ],
+                    "minItems": 0,
+                    "type": "array"
                 }
             },
             "type": "object"

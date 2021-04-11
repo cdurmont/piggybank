@@ -58,10 +58,13 @@ const EntryController = {
             return res.status(404).json({error: 'no entry id specified'});
         let entry:IEntry = { _id: req.params.id};
         EntryService.delete(entry, err => {
-            console.error('Error deleting entry ' + entry);
-            return res.status(400).json({error: 'Error deleting entry', detail: err});
-        })
-        res.status(200).end();
+            if (err) {
+                console.error('Error deleting entry ' + entry);
+                return res.status(400).json({error: 'Error deleting entry', detail: err});
+            }
+            res.status(200).end();
+        });
+
     }
 }
 

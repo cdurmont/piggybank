@@ -1,8 +1,10 @@
+import IEntry from "./IEntry";
 
 
 interface ITransaction {
     _id?: any,
-    balanced?: boolean
+    balanced?: boolean,
+    entries?: IEntry[]
 }
 
 export default ITransaction;
