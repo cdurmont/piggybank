@@ -56,6 +56,21 @@ const UserController = {
             }
             res.status(200).end();
         });
+    },
+
+    login: (req: Request, res: Response) => {
+        if (!validator.getSchema<IUser>('user')(req.body))
+            return res.status(400).json({error: 'Invalid User JSON'});
+        let user:IUser = req.body;
+        UserService.login(user, function (err, result) {
+            if (err) {
+                console.error('Error logging in user ' + user);
+                return res.status(400).json({error: 'Error logging in user', detail: err});
+            }
+            if (!result)
+                return res.status(403).json({error: 'Invalid user/password'});
+            res.json(result);
+        });
     }
 }
 

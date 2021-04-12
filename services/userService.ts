@@ -93,6 +93,10 @@ const UserService = {
         User.findOne({login: user.login}, 'login salt hash name apikey admin', {},(err, userDB) => {
            if (err)
                return callback(err);
+           if (!userDB)
+               userDB = new User({salt: '$2b$10$m6HX0s25n9DrfVNNLnHSXu', hash:null}); // dummy user ! The user wasn't found but be proceed anyway...
+           // the salt/hash is unsolvable no matter what the input is, but we still compute the hash
+           // so that the time taken to handle a nonexistent user is the same as in the case on a wrong password
            // hash password and compare
            bcrypt.hash(user.hash, userDB.salt, (err, hash) => {
                if (err)

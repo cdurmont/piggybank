@@ -1,6 +1,6 @@
 import {Strategy} from 'passport-localapikey';
 
-import UserService from '../../services/userService';
+import UserService from '../services/userService';
 
 const apiStrategy = new Strategy(
     function(apikey, done) {

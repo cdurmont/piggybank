@@ -13,7 +13,7 @@ const EntryController = {
 
         EntryService.create(entry, (err, entry) => {
             if (err) {
-                console.error('Error creating transaction ' + entry);
+                console.error('Error creating entry ' + entry);
                 return res.status(400).json({error: 'Error creating entry', detail: err});
             }
             res.json(entry);

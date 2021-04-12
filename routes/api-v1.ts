@@ -6,18 +6,15 @@ import UserController from '../controllers/userController';
 import AccountController from '../controllers/accountController';
 import TransactionController from "../controllers/transactionController";
 import EntryController from "../controllers/entryController";
+import PermissionController from "../controllers/permissionController";
 
 // API version
 router.get('/version', (req, res) => {
-    res.send('v1.0') ;
+    res.send('{"version" : "v1.0"}') ;
 });
 
 // login
-router.post('/login',
-            passport.authenticate('basic', {session: false}),
-            (req, res) => {
-                res.json(req['user']);
-            });
+router.post('/login', UserController.login);
 
 // Users CRUD
 router.post('/users', passport.authenticate('localapikey', {session: false}), UserController.create);
@@ -52,6 +49,14 @@ router.post('/entries', passport.authenticate('localapikey', {session: false}), 
 router.get('/entries', passport.authenticate('localapikey', {session: false}), EntryController.read);
 router.put('/entries/:id', passport.authenticate('localapikey', {session: false}), EntryController.update);
 router.delete('/entries/:id', passport.authenticate('localapikey', {session: false}), EntryController.delete);
+
+
+// Permissions CRUD
+
+router.post('/permissions', passport.authenticate('localapikey', {session: false}), PermissionController.create);
+router.get('/permissions', passport.authenticate('localapikey', {session: false}), PermissionController.read);
+router.put('/permissions/:id', passport.authenticate('localapikey', {session: false}), PermissionController.update);
+router.delete('/permissions/:id', passport.authenticate('localapikey', {session: false}), PermissionController.delete);
 
 
 export default router;

@@ -9,8 +9,7 @@ import passport from 'passport';
 
 import config from './config/config';
 import api from './routes/api-v1';
-import loginStrategy from './config/security/loginStrategy';
-import apiStrategy from './config/security/apiStrategy';
+import apiStrategy from './config/apiStrategy';
 
 
 class App {
@@ -27,7 +26,6 @@ class App {
         this.app.use(express.static(path.join(__dirname, 'public')));
 
         // authentication setup
-        passport.use(loginStrategy);
         passport.use(apiStrategy);
 
         // Route definitions
