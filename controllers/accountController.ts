@@ -22,9 +22,17 @@ const AccountController = {
     },
 
     read: (req: Request, res: Response) => {
-        if (!validator.getSchema<IAccount>('account')(req.body))
+        let acc;
+        try {
+            acc = JSON.parse(<string>req.query.filter);
+        }
+        catch (e) {
+            return res.status(400).json({error: 'filter param is not a valid Account JSON'});
+        }
+
+        if (!validator.getSchema<IAccount>('account')(acc))
             return res.status(400).json({error: 'Invalid Account JSON'});
-        let account:IAccount = req.body;
+        let account:IAccount = acc;
 
         AccountService.read(account, (err, accounts) => {
             if (err) {
