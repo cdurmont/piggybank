@@ -44,7 +44,7 @@ const UserService = {
      * @param callback (err, result:User[])
      */
     read(filter: IUser, callback: (err: object, userList: IUser[]) => void) {
-        User.find(filter, 'login name apikey')
+        User.find(filter, 'login name admin apikey')
             .exec(callback);
     },
 
