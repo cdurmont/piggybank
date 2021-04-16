@@ -104,8 +104,8 @@ const UserService = {
                if (hash === userDB.hash)
                {
                    // password is valid, logging in...
-                   userDB.salt = null;  // ... but keep salt&hash secret
-                   userDB.hash = null;
+                   userDB.salt = undefined;  // ... but keep salt&hash secret
+                   userDB.hash = undefined;
                    return callback(null, userDB);
                }
                return callback();  // no error, no user = invalid user or password
