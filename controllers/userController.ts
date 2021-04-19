@@ -13,7 +13,7 @@ const UserController = {
 
         UserService.create(newUser, function (err, result) {
             if (err) {
-                console.error('Error saving user ' + newUser);
+                console.error('Error saving user ' + JSON.stringify(newUser));
                 return res.status(400).json({error: 'Error creating user', detail: err});
             }
             res.json(result);
@@ -22,7 +22,17 @@ const UserController = {
     },
 
     read: (req: Request, res: Response) => {
-        UserService.read({}, (err, users) => {
+        let usr;
+        try {
+            if (!req.query.filter)
+                usr = {};
+            else
+                usr = JSON.parse(<string>req.query.filter);
+        }
+        catch (e) {
+            return res.status(400).json({error: 'filter param is not a valid User JSON'});
+        }
+        UserService.read(usr, (err, users) => {
             if (err) {
                 console.error('Error reading user list');
                 return res.status(400).json({error: 'Error reading user', detail: err});
