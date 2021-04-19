@@ -1,6 +1,7 @@
 import Account from '../models/account';
 import IAccount from "../models/IAccount";
 import {NativeError} from "mongoose";
+import EntrySchema from "../models/entry";
 
 const AccountService = {
 
@@ -42,7 +43,21 @@ const AccountService = {
             Account.deleteOne({_id: account._id}, {}, callback);
         });
 
+    },
+
+    getBalance: function (account: IAccount, callback: (err:NativeError, balance:number) => void) {
+        EntrySchema.aggregate([
+            { $match: { account: account._id}},
+            { $group: {_id: '$account', debit: { $sum: '$debit'}, credit: {$sum: '$credit'}}}
+        ], (err, result) => {
+            if (err)
+                return callback(err, 0);
+            if (result.length == 0)
+                return callback(null, 0);
+            return callback(null, result[0].debit - result[0].credit);
+        });
     }
 };
+
 
 export default AccountService;

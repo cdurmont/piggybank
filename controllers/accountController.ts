@@ -14,7 +14,7 @@ const AccountController = {
 
         AccountService.create(account, (err, newAccount) => {
             if (err) {
-                console.error('Error creating account ' + account);
+                console.error('Error creating account ' + JSON.stringify(account));
                 return res.status(400).json({error: 'Error creating account', detail: err});
             }
             res.json(newAccount);
@@ -36,7 +36,7 @@ const AccountController = {
 
         AccountService.read(account, (err, accounts) => {
             if (err) {
-                console.error('Error reading accounts, filter: ' + account);
+                console.error('Error reading accounts, filter: ' + JSON.stringify(account));
                 return res.status(400).json({error: 'Error reading account', detail: err});
             }
             res.json(accounts);
@@ -55,7 +55,7 @@ const AccountController = {
 
         AccountService.update(account, (err, account) => {
             if (err) {
-                console.error('Error updating account ' + account);
+                console.error('Error updating account ' + JSON.stringify(account));
                 return res.status(400).json({error: 'Error updating account', detail: err});
             }
             res.status(200).end();
@@ -69,13 +69,25 @@ const AccountController = {
         AccountService.delete(account, (err) => {
             if (err)
             {
-                console.error('Error deleting account '+ account);
+                console.error('Error deleting account '+ account._id);
                 return res.status(400).json({error: 'Error deleting account', detail: err});
             }
             res.status(200).end();
         });
-    }
+    },
 
+    getBalance: (req: Request, res: Response) => {
+        if (!req.params.id)
+            return res.status(404).json({error: 'no account id specified'});
+        let account: IAccount = new Account({_id: req.params.id});
+        AccountService.getBalance(account, (err, balance) => {
+            if (err) {
+                console.error('Error getting balance of account ' + account._id);
+                return res.status(400).json({error: 'Error getting balance of account', detail: err});
+            }
+            res.json({balance: balance});
+        })
+    }
 };
 
 export default AccountController;

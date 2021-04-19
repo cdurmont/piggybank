@@ -33,6 +33,7 @@ router.post('/accounts', passport.authenticate('localapikey', {session: false}),
 router.get('/accounts', passport.authenticate('localapikey', {session: false}), AccountController.read);
 router.put('/accounts/:id', passport.authenticate('localapikey', {session: false}), AccountController.update);
 router.delete('/accounts/:id', passport.authenticate('localapikey', {session: false}), AccountController.delete);
+router.get('/accounts/:id/balance', passport.authenticate('localapikey', {session: false}), AccountController.getBalance);
 
 
 // Transactions CRUD
