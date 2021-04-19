@@ -46,16 +46,45 @@ const AccountService = {
     },
 
     getBalance: function (account: IAccount, callback: (err:NativeError, balance:number) => void) {
-        EntrySchema.aggregate([
-            { $match: { account: account._id}},
-            { $group: {_id: '$account', debit: { $sum: '$debit'}, credit: {$sum: '$credit'}}}
-        ], (err, result) => {
+
+        // recursing through sub-accounts
+        this.read({parent: account._id}, async (err, accountList:IAccount[]) => {
             if (err)
                 return callback(err, 0);
-            if (result.length == 0)
-                return callback(null, 0);
-            return callback(null, result[0].debit - result[0].credit);
-        });
+            if (accountList.length > 0) {
+                // this account has sub-accounts, calculate balance for each one
+                let balance:number;
+                // for each sub-account, create a Promise to execute getBalance on it
+                let promises:Promise<number>[] = accountList.map(childAccount => {
+                    return new Promise<number>((resolve, reject) => {
+                        this.getBalance(childAccount, (err,balance) => {
+                            if (err)
+                                reject(err);
+                            else
+                                resolve(balance);
+                        });
+                    })
+                });
+                let balancesOfSubAccounts:number[] = await Promise.all(promises);
+                // add sub-accounts balances to get the result
+                balance = balancesOfSubAccounts.reduce((previousValue, currentValue) => { return previousValue+currentValue });
+                return callback(null, balance);
+            }
+
+            // case accountList.length == 0, this is a leaf node, stop recursion and actually do stuff
+            EntrySchema.aggregate([
+                { $match: { account: account._id}},
+                { $group: {_id: '$account', debit: { $sum: '$debit'}, credit: {$sum: '$credit'}}}
+            ], (err, result) => {
+                if (err)
+                    return callback(err, 0);
+                if (result.length == 0)
+                    return callback(null, 0);
+                return callback(null, result[0].debit - result[0].credit);
+            });
+
+        })
+
     }
 };
 
