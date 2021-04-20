@@ -2,6 +2,7 @@ import Account from '../models/account';
 import IAccount from "../models/IAccount";
 import {NativeError} from "mongoose";
 import EntrySchema from "../models/entry";
+import EntryService from "./entryService";
 
 const AccountService = {
 
@@ -32,15 +33,19 @@ const AccountService = {
 
     delete: function (account: IAccount, callback: (err:NativeError) => void) {
         // check if account has sub-accounts
-        let subAccount: IAccount = {
-            parent: account._id
-        };
-        this.read(subAccount, (err, subAccounts) => {
+        this.read({parent: account._id}, (err, subAccounts) => {
             if (err)
                 return callback(err);
             if (subAccounts && subAccounts.length > 0)
-                return callback(new NativeError('Cannot delete account with sub-accounts'));
-            Account.deleteOne({_id: account._id}, {}, callback);
+                return callback({name:'User error', message:'Cannot delete account with sub-accounts'});
+            // PIG-18 check if account has entries
+            EntryService.read({account: account._id}, (err, trans) => {
+                if (err)
+                    return callback(err);
+                if (trans.length>0)
+                    return callback({name:'User error', message:'Cannot delete account with entries'});
+                Account.deleteOne({_id: account._id}, {}, callback);
+            });
         });
 
     },
