@@ -8,6 +8,9 @@
                 "balanced": {
                     "type": "boolean"
                 },
+                "description": {
+                    "type": "string"
+                },
                 "entries": {
                     "items": [
                         {

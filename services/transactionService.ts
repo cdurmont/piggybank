@@ -51,7 +51,8 @@ const TransactionService = {
     update: function (trans: ITransaction, callback: (err:NativeError, trans: ITransaction) => void) {
         let transUpdate = new Transaction({
             _id: trans._id,
-            balanced: trans.balanced
+            balanced: trans.balanced,
+            description: trans.description
         });
         Transaction.updateOne({_id: trans._id}, transUpdate, {}, callback);
     },
