@@ -21,14 +21,21 @@ const EntryController = {
     },
 
     read: (req: Request, res: Response) => {
-        if (!validator.getSchema<IEntry>('entry')(req.body))
+        let filter;
+        try {
+            filter = JSON.parse(<string>req.query.filter);
+        }
+        catch (e) {
+            return res.status(400).json({error: 'filter param is not a valid Entry JSON'});
+        }
+        if (!validator.getSchema<IEntry>('entry')(filter))
             return res.status(400).json({error: 'Invalid Entry JSON'});
 
-        let entry:IEntry = req.body;
+        let entry:IEntry = filter;
 
         EntryService.read(entry, (err, entries) => {
             if (err) {
-                console.error('Error reading entries, filter= ' + entry);
+                console.error('Error reading entries, filter= ' + JSON.stringify(entry));
                 return res.status(400).json({error: 'Error reading entries', detail: err});
             }
             res.json(entries);
