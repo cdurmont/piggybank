@@ -42,6 +42,28 @@ const EntryController = {
         })
     },
 
+    readDetailed: (req: Request, res: Response) => {
+        let filter;
+        try {
+            filter = JSON.parse(<string>req.query.filter);
+        }
+        catch (e) {
+            return res.status(400).json({error: 'filter param is not a valid Entry JSON'});
+        }
+        if (!validator.getSchema<IEntry>('entry')(filter))
+            return res.status(400).json({error: 'Invalid Entry JSON'});
+
+        let entry:IEntry = filter;
+
+        EntryService.readDetailed(entry, (err, entries) => {
+            if (err) {
+                console.error('Error reading entries (detailed), filter= ' + JSON.stringify(entry));
+                return res.status(400).json({error: 'Error reading entries (detailed)', detail: err});
+            }
+            res.json(entries);
+        })
+    },
+
     update: (req: Request, res: Response) => {
         if (!validator.getSchema<IEntry>('entry')(req.body))
             return res.status(400).json({error: 'Invalid Entry JSON'});

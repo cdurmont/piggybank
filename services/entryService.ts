@@ -9,6 +9,10 @@ const EntryService = {
     },
 
     read: function (entryFilter: IEntry, callback: (err:NativeError, trans: IEntry[]) => void) {
+        Entry.find(entryFilter).populate('transaction').exec(callback);
+    },
+
+    readDetailed: function (entryFilter: IEntry, callback: (err:NativeError, trans: IEntry[]) => void) {
         let accountId = entryFilter.account._id ? entryFilter.account._id : entryFilter.account;
         Entry.aggregate([
             {   // stage 1 : get entries of the desired account

@@ -48,6 +48,7 @@ router.delete('/transactions/:id', passport.authenticate('localapikey', {session
 
 router.post('/entries', passport.authenticate('localapikey', {session: false}), EntryController.create);
 router.get('/entries', passport.authenticate('localapikey', {session: false}), EntryController.read);
+router.get('/entries/detailed', passport.authenticate('localapikey', {session: false}), EntryController.readDetailed);
 router.put('/entries/:id', passport.authenticate('localapikey', {session: false}), EntryController.update);
 router.delete('/entries/:id', passport.authenticate('localapikey', {session: false}), EntryController.delete);
 
