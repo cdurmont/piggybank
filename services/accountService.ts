@@ -16,6 +16,7 @@ const AccountService = {
         if (accountFilter && accountFilter.parent && Object.keys(accountFilter.parent).length === 0)    // checking an empty object is fun in js ;)
             accountFilter.parent = null;
         Account.find(accountFilter)
+            .populate('parent')
             .exec(callback);
     },
 
