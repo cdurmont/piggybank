@@ -7,6 +7,8 @@ import EntryService from "./entryService";
 const AccountService = {
 
     create: function (account: IAccount, callback: (err:NativeError, account: IAccount) => void) {
+        if (account.parent && Object.keys(account.parent).length === 0)
+            account.parent = undefined;
         let accountModel = new Account(account);
         accountModel.save(callback);
     },

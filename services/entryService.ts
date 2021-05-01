@@ -9,7 +9,7 @@ const EntryService = {
     },
 
     read: function (entryFilter: IEntry, callback: (err:NativeError, trans: IEntry[]) => void) {
-        Entry.find(entryFilter).populate('transaction').exec(callback);
+        Entry.find(entryFilter).populate('transaction account').exec(callback);
     },
 
     readDetailed: function (entryFilter: IEntry, callback: (err:NativeError, trans: IEntry[]) => void) {
