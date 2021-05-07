@@ -8,7 +8,22 @@
                 "balanced": {
                     "type": "boolean"
                 },
+                "type": {
+                    "type": "string"
+                },
                 "description": {
+                    "type": "string"
+                },
+                "recurStartDate": {
+                    "format": "date-time",
+                    "type": "string"
+                },
+                "recurEndDate": {
+                    "format": "date-time",
+                    "type": "string"
+                },
+                "recurNextDate": {
+                    "format": "date-time",
                     "type": "string"
                 },
                 "entries": {

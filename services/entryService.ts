@@ -3,16 +3,16 @@ import IEntry from "../models/IEntry";
 import Entry from "../models/entry";
 
 const EntryService = {
-    create: function (entry: IEntry, callback: (err:NativeError, entry: IEntry) => void) {
+    create: function (entry: IEntry, callback: (err: NativeError, entry: IEntry) => void) {
         let entryModel = new Entry(entry);
         entryModel.save(callback);
     },
 
-    read: function (entryFilter: IEntry, callback: (err:NativeError, trans: IEntry[]) => void) {
+    read: function (entryFilter: IEntry, callback: (err: NativeError, trans: IEntry[]) => void) {
         Entry.find(entryFilter).populate('transaction account').exec(callback);
     },
 
-    readDetailed: function (entryFilter: IEntry, callback: (err:NativeError, trans: IEntry[]) => void) {
+    readDetailed: function (entryFilter: IEntry, callback: (err: NativeError, trans: IEntry[]) => void) {
         let accountId = entryFilter.account._id ? entryFilter.account._id : entryFilter.account;
         Entry.aggregate([
             {   // stage 1 : get entries of the desired account
@@ -20,12 +20,31 @@ const EntryService = {
                     "account": Types.ObjectId(accountId)
                 }
             },
-            {   // stage 2 : join transactions
+            {
+                // stage 2 : join transactions
                 "$lookup": {
                     "from": "transactions",
-                    "localField": "transaction",
-                    "foreignField": "_id",
-                    "as": "transaction"
+                    "as": "transaction",
+                    "let": {
+                        txnId: "$transaction"
+                    },
+                    "pipeline": [
+                        {
+                            "$match": {
+                                "$expr": {
+                                    "$and": [
+                                        {
+                                            // first condition : the join condition
+                                            "$eq": ["$$txnId", "$_id"]
+                                        },
+                                        { // second condition : only Standard transactions
+                                            "$eq": ["$type", "S"]
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
                 }
             },
             {   // 1 txn per entry so we remove the unneeded []
@@ -68,12 +87,12 @@ const EntryService = {
                     ]
                 }
             }
-        ])  .sort({date: 1})
+        ]).sort({date: 1})
             .exec((err, result) => {
                 if (result) {
                     // calculate balance
                     // naive implementation, we get all the entries every time at once
-                    let balance:number = 0;
+                    let balance: number = 0;
                     result.forEach(entry => {
                         if (entry.debit)
                             balance += entry.debit;
@@ -86,12 +105,12 @@ const EntryService = {
             });
     },
 
-    update: function (entry: IEntry, callback: (err:NativeError, entry: IEntry) => void) {
+    update: function (entry: IEntry, callback: (err: NativeError, entry: IEntry) => void) {
         let entryModel = new Entry(entry);
         Entry.updateOne({_id: entry._id}, entryModel, {}, callback);
     },
 
-    delete: function (entry: IEntry, callback: (err:NativeError) => void) {
+    delete: function (entry: IEntry, callback: (err: NativeError) => void) {
         Entry.deleteOne({_id: entry._id}, {}, callback);
     }
 }

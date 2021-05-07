@@ -19,9 +19,16 @@ const TransactionController = {
     },
 
     read: (req: Request, res: Response) => {
-        if (!validator.getSchema<ITransaction>('transaction')(req.body))
+        let filter;
+        try {
+            filter = JSON.parse(<string>req.query.filter);
+        }
+        catch (e) {
+            return res.status(400).json({error: 'filter param is not a valid Transaction JSON'});
+        }
+        if (!validator.getSchema<ITransaction>('transaction')(filter))
             return res.status(400).json({error: 'Invalid Transaction JSON'});
-        let trans:ITransaction = req.body;
+        let trans:ITransaction = filter;
 
         TransactionService.read(trans, (err, transList) => {
             if (err) {
@@ -36,7 +43,6 @@ const TransactionController = {
         if (!validator.getSchema<ITransaction>('transaction')(req.body))
             return res.status(400).json({error: 'Invalid Transaction JSON'});
         let trans:ITransaction = req.body;
-
         if (!req.params.id)
             return res.status(404).json({error: 'no transaction id specified'});
         trans._id = req.params.id;

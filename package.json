@@ -22,6 +22,7 @@
     "passport": "^0.4.1",
     "passport-http": "^0.3.0",
     "passport-localapikey": "0.0.3",
+    "toad-scheduler": "^1.0.2",
     "ts-node": "^9.1.1",
     "uuid": "^8.3.2"
   },

@@ -81,8 +81,28 @@ const AccountService = {
 
             // case accountList.length == 0, this is a leaf node, stop recursion and actually do stuff
             EntrySchema.aggregate([
-                { $match: { account: account._id}},
-                { $group: {_id: '$account', debit: { $sum: '$debit'}, credit: {$sum: '$credit'}}}
+                {
+                    $match: { account: account._id }
+                },
+                {
+                    "$lookup": {
+                        "from": "transactions",
+                        "localField": "transaction",
+                        "foreignField": "_id",
+                        "as": "transaction"
+                    }
+                },
+                { "$unwind": "$transaction" },
+                {
+                    $match: { "transaction.type": "S" }
+                },
+                {
+                    $group: {
+                        _id: "$account",
+                        debit: { $sum: "$debit" },
+                        credit: { $sum: "$credit" }
+                    }
+                }
             ], (err, result) => {
                 if (err)
                     return callback(err, 0);

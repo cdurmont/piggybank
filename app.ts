@@ -6,14 +6,17 @@ import bodyParser from 'body-parser';
 import logger from 'morgan';
 import mongoose from 'mongoose';
 import passport from 'passport';
+import {ToadScheduler, Task, SimpleIntervalJob} from "toad-scheduler";
 
 import config from './config/config';
 import api from './routes/api-v1';
 import apiStrategy from './config/apiStrategy';
+import TransactionService from "./services/transactionService";
 
 
 class App {
     public app: express.Application;
+    scheduler: ToadScheduler;
 
     constructor() {
         this.app = express();
@@ -35,6 +38,13 @@ class App {
         const dbConn = config.DB_CONNECTION;
         mongoose.connect(dbConn, {useNewUrlParser: true, useUnifiedTopology: true, authSource: "admin" });
         mongoose.connection.on('error', console.error.bind(console, 'MongoDB connection error:'));
+
+        // recurring transactions scheduler
+        this.scheduler = new ToadScheduler();
+        let task = new Task('recur', () => {TransactionService.genRecurringTransactions()});
+        this.scheduler.addSimpleIntervalJob(new SimpleIntervalJob({hours: 4}, task));   // check recurring txns 3x a day, more than enough
+        // also check at startup just in case
+        TransactionService.genRecurringTransactions();
     }
 
 
