@@ -44,8 +44,8 @@ const AccountController = {
     },
 
     update: (req: Request, res: Response) => {
-        if (!validator.getSchema<IAccount>('account')(req.body))
-            return res.status(400).json({error: 'Invalid Account JSON'});
+        // if (!validator.getSchema<IAccount>('account')(req.body))
+        //     return res.status(400).json({error: 'Invalid Account JSON'});
         let account:IAccount = req.body;
 
         if (req.params.id)

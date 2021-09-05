@@ -2,10 +2,10 @@ import {Request, Response} from "express";
 import validator from "../config/validator";
 import IEntry from "../models/IEntry";
 import EntryService from "../services/entryService";
+import {Patch} from "../models/patch";
 
-
-const EntryController = {
-    create: (req: Request, res: Response) => {
+class EntryController  {
+    static create(req: Request, res: Response) {
         if (!validator.getSchema<IEntry>('entry')(req.body))
             return res.status(400).json({error: 'Invalid Entry JSON'});
 
@@ -18,9 +18,9 @@ const EntryController = {
             }
             res.json(entry);
         })
-    },
+    }
 
-    read: (req: Request, res: Response) => {
+    static read(req: Request, res: Response) {
         let filter;
         try {
             filter = JSON.parse(<string>req.query.filter);
@@ -40,9 +40,9 @@ const EntryController = {
             }
             res.json(entries);
         })
-    },
+    }
 
-    readDetailed: (req: Request, res: Response) => {
+    static readDetailed(req: Request, res: Response) {
         let filter;
         try {
             filter = JSON.parse(<string>req.query.filter);
@@ -62,9 +62,9 @@ const EntryController = {
             }
             res.json(entries);
         })
-    },
+    }
 
-    update: (req: Request, res: Response) => {
+    static update(req: Request, res: Response) {
         if (!validator.getSchema<IEntry>('entry')(req.body))
             return res.status(400).json({error: 'Invalid Entry JSON'});
 
@@ -80,20 +80,30 @@ const EntryController = {
             }
             res.status(200).end();
         })
-    },
+    }
 
-    delete: (req: Request, res: Response) => {
+    static batchUpdate(req: Request, res: Response) {
+        let patch: Patch<IEntry> = req.body;
+        EntryService.batchUpdate(patch.filter, patch.set, err => {
+            if (err) {
+                console.error('Error updating multiple entries : ' + JSON.stringify(patch));
+                return res.status(400).json({error: 'Error updating multiple entries', detail: err});
+            }
+            res.status(200).end();
+        });
+    }
+
+    static delete(req: Request, res: Response) {
         if (!req.params.id)
             return res.status(404).json({error: 'no entry id specified'});
         let entry:IEntry = { _id: req.params.id};
         EntryService.delete(entry, err => {
             if (err) {
-                console.error('Error deleting entry ' + entry);
+                console.error('Error deleting entry ' + JSON.stringify(entry));
                 return res.status(400).json({error: 'Error deleting entry', detail: err});
             }
             res.status(200).end();
         });
-
     }
 }
 

@@ -7,6 +7,7 @@ import AccountController from '../controllers/accountController';
 import TransactionController from "../controllers/transactionController";
 import EntryController from "../controllers/entryController";
 import PermissionController from "../controllers/permissionController";
+import ImportController from "../controllers/importController";
 
 // API version
 router.get('/version', (req, res) => {
@@ -47,6 +48,7 @@ router.delete('/transactions/:id', passport.authenticate('localapikey', {session
 // Entries CRUD
 
 router.post('/entries', passport.authenticate('localapikey', {session: false}), EntryController.create);
+router.patch('/entries', passport.authenticate('localapikey', {session: false}), EntryController.batchUpdate);
 router.get('/entries', passport.authenticate('localapikey', {session: false}), EntryController.read);
 router.get('/entries/detailed', passport.authenticate('localapikey', {session: false}), EntryController.readDetailed);
 router.put('/entries/:id', passport.authenticate('localapikey', {session: false}), EntryController.update);
@@ -60,5 +62,6 @@ router.get('/permissions', passport.authenticate('localapikey', {session: false}
 router.put('/permissions/:id', passport.authenticate('localapikey', {session: false}), PermissionController.update);
 router.delete('/permissions/:id', passport.authenticate('localapikey', {session: false}), PermissionController.delete);
 
-
+// Imports
+router.post('/imports/ofx', passport.authenticate('localapikey', {session: false}), ImportController.ofx);
 export default router;

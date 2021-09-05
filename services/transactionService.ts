@@ -34,7 +34,7 @@ const TransactionService = {
                 EntryService.create(entry, (err, entry) => {
                     if (err)
                         return callbackEach(err);
-                    newTrans.entries.push(entry);   // add new entry to resulting transaction
+                    //newTrans.entries.push(entry);   // add new entry to resulting transaction
                     callbackEach();
                 })
             }, err => {
@@ -45,7 +45,12 @@ const TransactionService = {
     },
 
     read: function (transFilter: ITransaction, callback: (err:NativeError, trans: ITransaction[]) => void) {
-        Transaction.find(transFilter)
+        Transaction
+            .find(transFilter)
+            .populate({path: 'entries', populate: {
+                    path: 'account',
+                    model: 'Account'
+                }})
             .exec(callback);
     },
 

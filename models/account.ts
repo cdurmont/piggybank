@@ -7,7 +7,7 @@ const AccountSchema = new Schema({
     externalRef: {type: String, maxlength: 100, required: false},
     iban: {type: String, maxlength: 34, required: false},
     parent: {type: Schema.Types.ObjectId, ref: 'Account', required: false},
-    type: {type: String, required: true, enum: ['S', 'U']}    // type = System ou User-defined
+    type: {type: String, required: true, enum: ['S', 'U', 'I']}    // type = System ou User-defined, 'I' = imported account
 });
 
 export default mongoose.model<IAccount & mongoose.Document>('Account', AccountSchema);

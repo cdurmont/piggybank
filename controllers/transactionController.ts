@@ -52,7 +52,7 @@ const TransactionController = {
                 console.error('Error updating transaction ' + trans);
                 return res.status(400).json({error: 'Error updating transaction', detail: err});
             }
-            res.status(200).end();
+            res.json(trans);
         })
     },
 

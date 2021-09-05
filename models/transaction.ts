@@ -9,6 +9,19 @@ const TransactionSchema = new Schema({
     recurStartDate: {type: Date},
     recurEndDate: {type: Date},
     recurNextDate: {type: Date}
+}, {
+    toJSON : { virtuals: true},
+    toObject : { virtuals: true}
 });
 
+TransactionSchema.virtual('entries', {
+    ref: 'Entry',
+    localField: '_id',
+    foreignField: 'transaction'
+});
+TransactionSchema.virtual('entries.account', {
+    ref: 'Account',
+    localField: 'entries.account',
+    foreignField: '_id'
+});
 export default mongoose.model<ITransaction & mongoose.Document>('Transaction', TransactionSchema);

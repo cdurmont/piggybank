@@ -7,6 +7,7 @@ import logger from 'morgan';
 import mongoose from 'mongoose';
 import passport from 'passport';
 import {ToadScheduler, Task, SimpleIntervalJob} from "toad-scheduler";
+import fileUpload from 'express-fileupload';
 
 import config from './config/config';
 import api from './routes/api-v1';
@@ -24,9 +25,10 @@ class App {
         this.app.use(logger('dev'));
         this.app.use(express.json());
         this.app.use(bodyParser.json());
-        this.app.use(express.urlencoded({ extended: false }));
+        this.app.use(express.urlencoded({ extended: true }));
         this.app.use(cookieParser());
         this.app.use(express.static(path.join(__dirname, 'public')));
+        this.app.use(fileUpload({createParentPath: true}));
 
         // authentication setup
         passport.use(apiStrategy);

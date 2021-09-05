@@ -28,7 +28,8 @@ const AccountService = {
             name: account.name,
             externalRef: account.externalRef,
             iban: account.iban,
-            parent: account.parent
+            parent: account.parent,
+            type: account.type
         });
 
         Account.updateOne({_id: account._id}, accountUpdate, {}, callback);

@@ -2,17 +2,17 @@ import {NativeError, Types} from 'mongoose';
 import IEntry from "../models/IEntry";
 import Entry from "../models/entry";
 
-const EntryService = {
-    create: function (entry: IEntry, callback: (err: NativeError, entry: IEntry) => void) {
+class EntryService  {
+    static create(entry: IEntry, callback: (err: NativeError, entry: IEntry) => void): void {
         let entryModel = new Entry(entry);
         entryModel.save(callback);
-    },
+    }
 
-    read: function (entryFilter: IEntry, callback: (err: NativeError, trans: IEntry[]) => void) {
+    static read(entryFilter: IEntry, callback: (err: NativeError, trans: IEntry[]) => void):void {
         Entry.find(entryFilter).populate('transaction account').exec(callback);
-    },
+    }
 
-    readDetailed: function (entryFilter: IEntry, callback: (err: NativeError, trans: IEntry[]) => void) {
+    static readDetailed(entryFilter: IEntry, callback: (err: NativeError, trans: IEntry[]) => void):void {
         let accountId = entryFilter.account._id ? entryFilter.account._id : entryFilter.account;
         Entry.aggregate([
             {   // stage 1 : get entries of the desired account
@@ -103,14 +103,23 @@ const EntryService = {
                 }
                 return callback(err, result);
             });
-    },
+    }
 
-    update: function (entry: IEntry, callback: (err: NativeError, entry: IEntry) => void) {
+    static update(entry: IEntry, callback: (err: NativeError, entry: IEntry) => void):void {
+        // secure debit/credit updates, so only one could be defined
+        if (entry.credit && entry.credit != 0)
+            entry.debit = 0;
+        if (entry.debit && entry.debit != 0)
+            entry.credit = 0;
         let entryModel = new Entry(entry);
         Entry.updateOne({_id: entry._id}, entryModel, {}, callback);
-    },
+    }
 
-    delete: function (entry: IEntry, callback: (err: NativeError) => void) {
+    static batchUpdate(filter: IEntry, set: IEntry, callback: (err: NativeError) => void): void {
+        Entry.updateMany(filter, set,{},callback);
+    }
+
+    static delete(entry: IEntry, callback: (err: NativeError) => void):void {
         Entry.deleteOne({_id: entry._id}, {}, callback);
     }
 }
