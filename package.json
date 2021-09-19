@@ -18,6 +18,7 @@
     "cors": "^2.8.5",
     "debug": "~2.6.9",
     "express": "~4.16.1",
+    "express-fileupload": "^1.2.1",
     "mongoose": "^5.12.2",
     "morgan": "~1.9.1",
     "ofx": "^0.5.0",
