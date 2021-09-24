@@ -1,7 +1,7 @@
 #
 # Builder stage.
 #
-FROM node:16.1.0 AS builder
+FROM node:16 AS builder
 
 WORKDIR /usr/src/app
 
@@ -22,7 +22,7 @@ RUN npm run build
 #
 # Production stage.
 #
-FROM node:16.1.0-alpine3.13
+FROM node:16-alpine
 EXPOSE 3000
 
 WORKDIR /app
