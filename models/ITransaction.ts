@@ -1,4 +1,5 @@
 import IEntry from "./IEntry";
+import IUser from "./IUser";
 
 
 interface ITransaction {
@@ -9,6 +10,7 @@ interface ITransaction {
     recurStartDate?: Date,
     recurEndDate?: Date,
     recurNextDate?: Date,
+    owner?: IUser,
     entries?: IEntry[]
 }
 

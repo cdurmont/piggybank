@@ -1,18 +1,46 @@
 import {NativeError, Types} from 'mongoose';
 import IEntry from "../models/IEntry";
 import Entry from "../models/entry";
+import IUser from "../models/IUser";
+import PermissionService from "./permissionService";
+import Account from "../models/account";
 
 class EntryService  {
-    static create(entry: IEntry, callback: (err: NativeError, entry: IEntry) => void): void {
+    static create(entry: IEntry, user:IUser, callback: (err: NativeError, entry: IEntry) => void): void {
         let entryModel = new Entry(entry);
-        entryModel.save(callback);
+        if (!user.admin) {
+            // if not an admin, user must have a W permission for this account to update
+            PermissionService.read({user: user, account: entry.account, type: 'W'}, (err, perms) => {
+                if (perms && perms.length>0)
+                    entryModel.save(callback);  // user allowed
+                else
+                    callback({name: 'Permission denied', message:'User has no permission to create an entry on this account'}, null);
+            });
+        }
+        else
+            entryModel.save(callback);
     }
 
     static read(entryFilter: IEntry, callback: (err: NativeError, trans: IEntry[]) => void):void {
         Entry.find(entryFilter).populate('transaction account').exec(callback);
     }
 
-    static readDetailed(entryFilter: IEntry, callback: (err: NativeError, trans: IEntry[]) => void):void {
+    static readDetailed(entryFilter: IEntry, user:IUser, callback: (err: NativeError, trans: IEntry[]) => void):void {
+        let accountId = entryFilter.account._id ? entryFilter.account._id : entryFilter.account;
+        if (!user.admin) {
+            // if not an admin, user must have a W permission for this account to update
+            PermissionService.read({user: user, account: {_id: accountId}}, (err, perms) => {
+                if (perms && perms.length>0)
+                    this.readDetailedAllowed(entryFilter, user, callback);  // user allowed
+                else
+                    callback({name: 'Permission denied', message:'User has no permission to read an entry on this account'}, null);
+            });
+        }
+        else
+            this.readDetailedAllowed(entryFilter, user, callback);
+    }
+
+    private static readDetailedAllowed(entryFilter: IEntry, user:IUser, callback: (err: NativeError, trans: IEntry[]) => void):void {
         let accountId = entryFilter.account._id ? entryFilter.account._id : entryFilter.account;
         Entry.aggregate([
             {   // stage 1 : get entries of the desired account
@@ -105,7 +133,21 @@ class EntryService  {
             });
     }
 
-    static update(entry: IEntry, callback: (err: NativeError, entry: IEntry) => void):void {
+    static update(entry: IEntry, user:IUser, callback: (err: NativeError, entry: IEntry) => void):void {
+        if (!user.admin) {
+            // if not an admin, user must have a W permission for this account to update
+            PermissionService.read({user: user, account: entry.account, type: 'W'}, (err, perms) => {
+                if (perms && perms.length>0)
+                    this.updateAllowed(entry, user, callback);
+                else
+                    callback({name: 'Permission denied', message:'User has no permission to update an entry on this account'}, null);
+            });
+        }
+        else
+            this.updateAllowed(entry, user, callback);
+    }
+
+    private static updateAllowed(entry: IEntry, user:IUser, callback: (err: NativeError, entry: IEntry) => void):void {
         // secure debit/credit updates, so only one could be defined
         if (entry.credit && entry.credit != 0)
             entry.debit = 0;
@@ -115,12 +157,32 @@ class EntryService  {
         Entry.updateOne({_id: entry._id}, entryModel, {}, callback);
     }
 
-    static batchUpdate(filter: IEntry, set: IEntry, callback: (err: NativeError) => void): void {
-        Entry.updateMany(filter, set,{},callback);
+    static batchUpdate(filter: IEntry, user:IUser, set: IEntry, callback: (err: NativeError) => void): void {
+        if (!user.admin) {
+            // if not an admin, user must have a W permission for this account to update
+            PermissionService.read({user: user, account: filter.account, type: 'W'}, (err, perms) => {
+                if (perms && perms.length>0)
+                    Entry.updateMany(filter, set,{},callback);
+                else
+                    callback({name: 'Permission denied', message:'User has no permission to update an entry on this account'});
+            });
+        }
+        else
+            Entry.updateMany(filter, set,{},callback);
     }
 
-    static delete(entry: IEntry, callback: (err: NativeError) => void):void {
-        Entry.deleteOne({_id: entry._id}, {}, callback);
+    static delete(entry: IEntry, user:IUser, callback: (err: NativeError) => void):void {
+        if (!user.admin) {
+            // if not an admin, user must have a W permission for this account to update
+            PermissionService.read({user: user, account: entry.account, type: 'W'}, (err, perms) => {
+                if (perms && perms.length>0)
+                    Entry.deleteOne({_id: entry._id}, {}, callback);  // user allowed
+                else
+                    callback({name: 'Permission denied', message:'User has no permission to delete an entry on this account'});
+            });
+        }
+        else
+            Entry.deleteOne({_id: entry._id}, {}, callback);
     }
 }
 

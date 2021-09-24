@@ -8,8 +8,8 @@ const TransactionController = {
         if (!validator.getSchema<ITransaction>('transaction')(req.body))
             return res.status(400).json({error: 'Invalid Transaction JSON'});
         let trans:ITransaction = req.body;
-
-        TransactionService.create(trans, (err, trans) => {
+        // @ts-ignore
+        TransactionService.create(trans, req.user, (err, trans) => {
             if (err) {
                 console.error('Error creating transaction ' + trans);
                 return res.status(400).json({error: 'Error creating transaction', detail: err});
@@ -60,7 +60,8 @@ const TransactionController = {
         if (!req.params.id)
             return res.status(404).json({error: 'no transaction id specified'});
         let trans:ITransaction = { _id: req.params.id};
-        TransactionService.delete(trans, err => {
+        // @ts-ignore
+        TransactionService.delete(trans, req.user, err => {
             if (err) {
                 console.error('Error deleting transaction ' + trans);
                 return res.status(400).json({error: 'Error deleting transaction', detail: err});

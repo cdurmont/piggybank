@@ -6,7 +6,8 @@ interface IEntry {
     credit?: number,
     debit?: number,
     reference?: string,
-    description?: string
+    description?: string,
+    contreparties?: IEntry[]
 }
 
 export default IEntry;

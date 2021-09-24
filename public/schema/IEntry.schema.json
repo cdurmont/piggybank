@@ -27,6 +27,15 @@
                 },
                 "transaction": {
                     "$ref": "ITransaction.schema.json"
+                },
+                "contreparties" : {
+                    "items": [
+                        {
+                            "$ref": "IEntry.schema.json"
+                        }
+                    ],
+                    "minItems": 0,
+                    "type": "array"
                 }
             },
             "type": "object"

@@ -1,11 +1,14 @@
 import {NativeError} from "mongoose";
 import IPermission from "../models/IPermission";
 import Permission from "../models/permission";
+import IUser from "../models/IUser";
 
 
 const PermissionService = {
-    create: function (perm: IPermission, callback: (err:NativeError, perm: IPermission) => void) {
+    create: function (perm: IPermission, user:IUser, callback: (err:NativeError, perm: IPermission) => void) {
         let permModel = new Permission(perm);
+        if (!user.admin)
+            return callback({name:'Permission denied', message: 'Permission management restricted to admin users'}, null);
         permModel.save(callback);
     },
 
@@ -14,12 +17,16 @@ const PermissionService = {
             .exec(callback);
     },
 
-    update: function (perm: IPermission, callback: (err:NativeError, perm: IPermission) => void) {
+    update: function (perm: IPermission, user:IUser, callback: (err:NativeError, perm: IPermission) => void) {
         let permModel = new Permission(perm);
+        if (!user.admin)
+            return callback({name:'Permission denied', message: 'Permission management restricted to admin users'}, null);
         Permission.updateOne({_id: perm._id}, permModel, {}, callback);
     },
 
-    delete: function (perm: IPermission, callback: (err:NativeError) => void) {
+    delete: function (perm: IPermission, user:IUser, callback: (err:NativeError) => void) {
+        if (!user.admin)
+            return callback({name:'Permission denied', message: 'Permission management restricted to admin users'});
         Permission.deleteOne({_id: perm._id}, {}, callback);
     }
 };

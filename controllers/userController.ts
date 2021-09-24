@@ -10,8 +10,8 @@ const UserController = {
         if (!validator.getSchema<IUser>('user')(req.body))
             return res.status(400).json({error: 'Invalid User JSON'});
         let newUser:IUser = req.body;
-
-        UserService.create(newUser, function (err, result) {
+        // @ts-ignore
+        UserService.create(newUser, req.user,function (err, result) {
             if (err) {
                 console.error('Error saving user ' + JSON.stringify(newUser));
                 return res.status(400).json({error: 'Error creating user', detail: err});
@@ -32,7 +32,8 @@ const UserController = {
         catch (e) {
             return res.status(400).json({error: 'filter param is not a valid User JSON'});
         }
-        UserService.read(usr, (err, users) => {
+        // @ts-ignore
+        UserService.read(usr, req.user,(err, users) => {
             if (err) {
                 console.error('Error reading user list');
                 return res.status(400).json({error: 'Error reading user', detail: err});
@@ -47,7 +48,8 @@ const UserController = {
         let user:IUser = req.body;
         user._id = req.params.id;
 
-        UserService.update(user, (err) => {
+        // @ts-ignore
+        UserService.update(user, req.user,(err) => {
             if (err) {
                 console.error('Error updating user ' + user);
                 return res.status(400).json({error: 'Error updating user', detail: err});
@@ -59,7 +61,8 @@ const UserController = {
     delete: (req: Request, res: Response) => {
 
         let user = new User({_id: req.params.id});
-        UserService.delete(user, (err) => {
+        // @ts-ignore
+        UserService.delete(user, req.user,(err) => {
             if (err) {
                 console.error('Error deleting user');
                 return res.status(400).json({error: 'Error deleting user', detail: err});

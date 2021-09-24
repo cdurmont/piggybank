@@ -1,0 +1,2 @@
+# import direct dans un conteneur mongo (copier le fichier dans le container avant)
+mongoimport --jsonArray -d <database> -c <collection> --authenticationDatabase admin --username=<user> --password=<pass> <import src destination>

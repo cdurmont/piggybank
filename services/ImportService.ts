@@ -4,6 +4,7 @@ import AccountService from "./accountService";
 import IAccount from "../models/IAccount";
 import ITransaction from "../models/ITransaction";
 import TransactionService from "./transactionService";
+import IUser from "../models/IUser";
 
 interface OfxAccount {
     STMTRS: any;        // rest of the structure, including entries
@@ -21,7 +22,15 @@ interface OfxEntry {
 
 class ImportService  {
 
-    static ofx(path: string):void {
+    /**
+     * Import ofx file
+     * @param path Path of file to import
+     */
+    static ofx(path: string, user):void {
+        if (!user.admin) {
+            console.log('Import retricted to admin users');
+            return;
+        }
         console.log(`Importing OFX file ${path}...`);
         fs.readFile(path, {encoding: 'utf8'},(err, data) => {
            if (err) throw err;
@@ -30,13 +39,22 @@ class ImportService  {
             accounts.forEach(account => {
                 console.log("Account ID : "+ account.TRNUID);
                 // try to find the account in the db
-                AccountService.read({externalRef: account.TRNUID}, (err, accountList) => {
+                AccountService.read({externalRef: account.TRNUID}, user,(err, accountList) => {
                     if (err) throw err;
-                    let entries:Array<OfxEntry> = account.STMTRS.BANKTRANLIST.STMTTRN;  // yeah right
 
+                    // Possible values for STMTTRN :
+                    // undefined    : no entries for this account
+                    // array        : you kinda expect that
+                    // object       : when there is only one entry, it's not wrapped into an array (such a good design...)
+                    let objEntries = account.STMTRS.BANKTRANLIST.STMTTRN;  // yeah right
+                    let entries:Array<OfxEntry>;
+                    if (!objEntries || Array.isArray(objEntries))   // undefined or array can be passed as-is
+                        entries = objEntries;
+                    else
+                        entries = [objEntries];
 
                     if (accountList && accountList.length>0)
-                        this.importEntries(accountList[0], entries);
+                        this.importEntries(accountList[0], user, entries);
                     else {
                         // create account first
                         let accountDb:IAccount = {
@@ -44,9 +62,9 @@ class ImportService  {
                             type: 'I',    // Imported account
                             name: 'Import OFX'
                         };
-                        AccountService.create(accountDb, (err1, accountDb) => {
+                        AccountService.create(accountDb, user, (err1, accountDb) => {
                             if (err) throw err;
-                            this.importEntries(accountDb, entries);
+                            this.importEntries(accountDb, user, entries);
                         });
                     }
                 });
@@ -56,8 +74,7 @@ class ImportService  {
         });
     }
 
-
-    private static importEntries(account:IAccount, ofxEntries: Array<OfxEntry>) {
+    private static importEntries(account:IAccount, user:IUser, ofxEntries: Array<OfxEntry>) {
         if (ofxEntries)
             ofxEntries.forEach(ofxEntry => {
                 console.log("\t"+ ofxEntry.NAME+"\t"+ofxEntry.TRNTYPE+"\t"+ofxEntry.TRNAMT);
@@ -74,7 +91,7 @@ class ImportService  {
                     }]
                 };
                 // TODO some form of account guessing to balance the transaction would be great !
-                TransactionService.create(txn, err => {
+                TransactionService.create(txn, user,err => {
                     if (err) throw err;
                 });
             });

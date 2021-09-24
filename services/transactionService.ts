@@ -4,10 +4,11 @@ import Transaction from '../models/transaction';
 import async from 'async';
 import EntryService from "./entryService";
 import IEntry from "../models/IEntry";
+import IUser from "../models/IUser";
 
 const TransactionService = {
 
-    create: function (trans: ITransaction, callback: (err:NativeError, trans: ITransaction) => void) {
+    create: function (trans: ITransaction, user:IUser, callback: (err:NativeError, trans: ITransaction) => void) {
         // 'balanced' attribute override if transaction contains entries
         let debit:number = 0, credit:number = 0;
         if (trans.entries) {
@@ -31,7 +32,7 @@ const TransactionService = {
             async.each(trans.entries,(entry, callbackEach) => {
                 // save entry
                 entry.transaction = newTrans;
-                EntryService.create(entry, (err, entry) => {
+                EntryService.create(entry, user, (err, entry) => {
                     if (err)
                         return callbackEach(err);
                     //newTrans.entries.push(entry);   // add new entry to resulting transaction
@@ -67,13 +68,13 @@ const TransactionService = {
         Transaction.updateOne({_id: trans._id}, transUpdate, {}, callback);
     },
 
-    delete: function (trans: ITransaction, callback: (err:NativeError) => void) {
+    delete: function (trans: ITransaction, user:IUser, callback: (err:NativeError) => void) {
         // delete transaction entries first
         EntryService.read({transaction: trans._id}, (err, entries) => {
             if (err)
                 return callback(err);
             async.forEach(entries, (entry, callbackEntry) => {
-                EntryService.delete(entry, callbackEntry);
+                EntryService.delete(entry, user, callbackEntry);
             },err => {
                 if (err)
                     return callback(err);

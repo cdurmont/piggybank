@@ -10,8 +10,8 @@ const PermissionController = {
             return res.status(400).json({error: 'Invalid Permission JSON'});
 
         let perm:IPermission = req.body;
-
-        PermissionService.create(perm, (err, perm) => {
+        // @ts-ignore req.user provided by passportjs
+        PermissionService.create(perm, req.user,(err, perm) => {
             if (err) {
                 console.error('Error creating permission ' + perm);
                 return res.status(400).json({error: 'Error creating permission', detail: err});
@@ -21,10 +21,18 @@ const PermissionController = {
     },
 
     read: (req: Request, res: Response) => {
-        if (!validator.getSchema<IPermission>('permission')(req.body))
+        let perm;
+        try {
+            perm = JSON.parse(<string>req.query.filter);
+        }
+        catch (e) {
+            return res.status(400).json({error: 'filter param is not a valid Account JSON'});
+        }
+
+        if (!validator.getSchema<IPermission>('permission')(perm))
             return res.status(400).json({error: 'Invalid Permission JSON'});
 
-        let permFilter:IPermission = req.body;
+        let permFilter:IPermission = perm;
 
         PermissionService.read(permFilter, (err, permissions) => {
             if (err) {
@@ -44,7 +52,8 @@ const PermissionController = {
         if (!req.params.id)
             return res.status(404).json({error: 'no permission id specified'});
         perm._id = req.params.id;
-        PermissionService.update(perm, (err, perm) => {
+        // @ts-ignore req.user provided by passportjs
+        PermissionService.update(perm, req.user, (err, perm) => {
             if (err) {
                 console.error('Error updating permission ' + perm);
                 return res.status(400).json({error: 'Error updating permission', detail: err});
@@ -57,7 +66,8 @@ const PermissionController = {
         if (!req.params.id)
             return res.status(404).json({error: 'no permission id specified'});
         let perm:IPermission = { _id: req.params.id};
-        PermissionService.delete(perm, err => {
+        // @ts-ignore req.user provided by passportjs
+        PermissionService.delete(perm, req.user, err => {
             if (err) {
                 console.error('Error deleting permission ' + perm);
                 return res.status(400).json({error: 'Error deleting permission', detail: err});

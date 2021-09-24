@@ -2,7 +2,7 @@ import User from '../models/user';
 import bcrypt from 'bcrypt';
 import {v4} from 'uuid';
 import IUser from "../models/IUser";
-import {NativeError} from "mongoose";
+import {NativeError, Types} from "mongoose";
 
 const saltRounds = 10;
 
@@ -13,7 +13,9 @@ const UserService = {
      * @param newUser User to create. Put password in the hash field, it will be salted and hashed upon saving
      * @param callback (err, result:User)
      */
-    create(newUser: IUser, callback: (err: object, user: IUser) => void) {
+    create(newUser: IUser, currentUser:IUser, callback: (err: object, user: IUser) => void) {
+        if (!currentUser.admin)
+            return callback({name:'Permission denied', message: 'User management restricted to admin users'}, null);
         // TODO check for duplicates
         this.saltHash(newUser, (err, newUser) => {
             if (err)
@@ -40,12 +42,18 @@ const UserService = {
 
     /**
      * Retrieves the user list
-     * @param filter not implemented !
+     * @param filter
      * @param callback (err, result:User[])
      */
-    read(filter: IUser, callback: (err: object, userList: IUser[]) => void) {
-        User.find(filter, 'login name admin apikey')
-            .exec(callback);
+    read(filter: IUser, currentUser:IUser, callback: (err: object, userList: IUser[]) => void) {
+        if (!currentUser.admin)
+            return callback({name:'Permission denied', message: 'User management restricted to admin users'}, null);
+        if (filter && filter._id) {
+            User.findById(filter._id, 'login name admin apikey').exec((err, res) => { callback(err, [res])});
+        }
+        else
+            User.find(filter, 'login name admin apikey')
+                .exec(callback);
     },
 
     /**
@@ -53,14 +61,15 @@ const UserService = {
      * @param user
      * @param callback
      */
-    update(user: IUser, callback: (err: object, user: IUser) => void) {
-        // TODO add input sanitization
+    update(user: IUser, currentUser:IUser, callback: (err: object, user: IUser) => void) {
+        if (!currentUser.admin && !(user._id === currentUser._id))  // update allowed for admin and for self-updating (except upgrading to admin)
+            return callback({name:'Permission denied', message: 'User management restricted to admin users'}, null);
         // allow modification of some fields only
         let userUpdate = new User({
             _id: user._id,
             name: user.name,
             login: user.login,
-            admin: user.admin
+            admin: currentUser.admin ? user.admin : false   // if current user is not admin, do not let him self-promote as admin !
         });
         // update callback : persist modifications
         let updateCallback = (err: object, user: IUser) => {
@@ -80,7 +89,9 @@ const UserService = {
 
     },
 
-    delete(user: IUser, callback: (err: object) => void) {
+    delete(user: IUser, currentUser:IUser, callback: (err: object) => void) {
+        if (!currentUser.admin)
+            return callback({name:'Permission denied', message: 'User management restricted to admin users'});
         User.deleteOne({_id: user._id}, {}, callback);
     },
 

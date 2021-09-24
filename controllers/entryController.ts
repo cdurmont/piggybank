@@ -11,7 +11,8 @@ class EntryController  {
 
         let entry:IEntry = req.body;
 
-        EntryService.create(entry, (err, entry) => {
+        // @ts-ignore
+        EntryService.create(entry, req.user, (err, entry) => {
             if (err) {
                 console.error('Error creating entry ' + entry);
                 return res.status(400).json({error: 'Error creating entry', detail: err});
@@ -55,7 +56,8 @@ class EntryController  {
 
         let entry:IEntry = filter;
 
-        EntryService.readDetailed(entry, (err, entries) => {
+        // @ts-ignore
+        EntryService.readDetailed(entry, req.user,(err, entries) => {
             if (err) {
                 console.error('Error reading entries (detailed), filter= ' + JSON.stringify(entry));
                 return res.status(400).json({error: 'Error reading entries (detailed)', detail: err});
@@ -73,7 +75,8 @@ class EntryController  {
         if (!req.params.id)
             return res.status(404).json({error: 'no entry id specified'});
         entry._id = req.params.id;
-        EntryService.update(entry, (err, entry) => {
+        // @ts-ignore
+        EntryService.update(entry, req.user,(err, entry) => {
             if (err) {
                 console.error('Error updating entry ' + entry);
                 return res.status(400).json({error: 'Error updating entry', detail: err});
@@ -84,7 +87,8 @@ class EntryController  {
 
     static batchUpdate(req: Request, res: Response) {
         let patch: Patch<IEntry> = req.body;
-        EntryService.batchUpdate(patch.filter, patch.set, err => {
+        // @ts-ignore
+        EntryService.batchUpdate(patch.filter, req.user, patch.set, err => {
             if (err) {
                 console.error('Error updating multiple entries : ' + JSON.stringify(patch));
                 return res.status(400).json({error: 'Error updating multiple entries', detail: err});
@@ -97,7 +101,8 @@ class EntryController  {
         if (!req.params.id)
             return res.status(404).json({error: 'no entry id specified'});
         let entry:IEntry = { _id: req.params.id};
-        EntryService.delete(entry, err => {
+        // @ts-ignore
+        EntryService.delete(entry, req.user,err => {
             if (err) {
                 console.error('Error deleting entry ' + JSON.stringify(entry));
                 return res.status(400).json({error: 'Error deleting entry', detail: err});
