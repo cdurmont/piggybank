@@ -118,7 +118,7 @@ const TransactionService = {
                                newTxn.entries.push(newEntry);
                            });
                            // then save the new transaction
-                           this.create(newTxn, (err) => {
+                           this.create(newTxn, {name:'daemon', admin:true}, (err) => {
                                if (err) {
                                    console.error("Error while saving new occurrence of recurring transaction "+ JSON.stringify(err));
                                    return;
