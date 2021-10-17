@@ -54,7 +54,7 @@ const UserController = {
                 console.error('Error updating user ' + user);
                 return res.status(400).json({error: 'Error updating user', detail: err});
             }
-            res.status(200).end();
+            res.json(user);
         });
     },
 

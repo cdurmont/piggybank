@@ -14,6 +14,7 @@ const PermissionService = {
 
     read: function (permFilter: IPermission, callback: (err:NativeError, trans: IPermission[]) => void) {
         Permission.find(permFilter)
+            .populate("account")
             .exec(callback);
     },
 

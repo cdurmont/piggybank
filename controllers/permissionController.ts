@@ -58,7 +58,7 @@ const PermissionController = {
                 console.error('Error updating permission ' + perm);
                 return res.status(400).json({error: 'Error updating permission', detail: err});
             }
-            res.status(200).end();
+            res.json(perm);
         })
     },
 
