@@ -18,6 +18,7 @@ const ImportController = {
             ofx.mv(ofxPath).then(() => {
                 // @ts-ignore
                 ImportService.ofx(ofxPath, req.user);
+                res.status(200).end();
             });
         } catch (err) {
             console.error("error importing file :"+ JSON.stringify(err));
