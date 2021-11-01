@@ -115,9 +115,15 @@ const UserService = {
                if (hash === userDB.hash)
                {
                    // password is valid, logging in...
-                   userDB.salt = undefined;  // ... but keep salt&hash secret
-                   userDB.hash = undefined;
-                   return callback(null, userDB);
+                   const userResult:IUser = {
+                       _id: userDB._id,
+                       login: userDB.login,
+                       name: userDB.name,
+                       admin: userDB.admin,
+                       domain: user.domain,
+                       apikey: userDB.apikey
+                   };
+                   return callback(null, userResult);
                }
                return callback();  // no error, no user = invalid user or password
            });

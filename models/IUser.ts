@@ -7,6 +7,7 @@ interface IUser {
     apikey?: string,
     name?: string,
     admin?: boolean,
+    domain?: string,
     displayName?: string    // virtual, defined in schema
 }
 

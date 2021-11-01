@@ -82,6 +82,7 @@ const UserController = {
             }
             if (!result)
                 return res.status(403).json({error: 'Invalid user/password'});
+            console.log('Sending login info : '+ JSON.stringify(result));
             res.json(result);
         });
     }
