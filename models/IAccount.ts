@@ -6,7 +6,8 @@ interface IAccount {
     externalRef?: string,
     iban?: string,
     parent?: any,
-    type?: string
+    type?: string,
+    colorRevert?: boolean,
 }
 
 export default IAccount;

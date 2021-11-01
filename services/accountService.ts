@@ -57,7 +57,8 @@ const AccountService = {
             externalRef: account.externalRef,
             iban: account.iban,
             parent: account.parent,
-            type: account.type
+            type: account.type,
+            colorRevert: account.colorRevert
         });
         if (!user.admin) {
             // if not an admin, user must have a W permission for this account to update
