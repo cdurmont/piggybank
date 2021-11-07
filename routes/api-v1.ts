@@ -26,11 +26,6 @@ router.get('/users', passport.authenticate('headerapikey', {session: false}), Us
 router.put('/users/:id', passport.authenticate('headerapikey', {session: false}), UserController.update);
 router.delete('/users/:id', passport.authenticate('headerapikey', {session: false}), UserController.delete);
 
-router.get('/users/:id', passport.authenticate('headerapikey', {session: false}), (req, res) => {
-    // TODO read user by id
-    res.send('Not implemented : read user');
-})
-
 // Accounts CRUD
 
 router.post('/accounts', passport.authenticate('headerapikey', {session: false}), AccountController.create);

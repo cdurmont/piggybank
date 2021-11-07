@@ -90,7 +90,6 @@ class ImportService  {
                         date: new Date(+ofxEntry.DTPOSTED.slice(0,4),+ofxEntry.DTPOSTED.slice(4,6)-1,+ofxEntry.DTPOSTED.slice(6,8)) // -1 for month (0-11)
                     }]
                 };
-                // TODO some form of account guessing to balance the transaction would be great !
                 TransactionService.create(txn, user,err => {
                     if (err) throw err;
                 });

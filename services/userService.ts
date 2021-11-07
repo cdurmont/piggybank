@@ -16,7 +16,6 @@ const UserService = {
     create(newUser: IUser, currentUser:IUser, callback: (err: object, user: IUser) => void) {
         if (!currentUser.admin)
             return callback({name:'Permission denied', message: 'User management restricted to admin users'}, null);
-        // TODO check for duplicates
         this.saltHash(newUser, (err, newUser) => {
             if (err)
             {
