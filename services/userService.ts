@@ -2,7 +2,7 @@ import User from '../models/user';
 import bcrypt from 'bcrypt';
 import {v4} from 'uuid';
 import IUser from "../models/IUser";
-import {NativeError, Types} from "mongoose";
+import mongoose, {NativeError} from "mongoose";
 
 const saltRounds = 10;
 
@@ -11,6 +11,7 @@ const UserService = {
     /**
      * Creates a new user
      * @param newUser User to create. Put password in the hash field, it will be salted and hashed upon saving
+     * @param currentUser The connected user. Used to check if user is allowed to perform this action
      * @param callback (err, result:User)
      */
     create(newUser: IUser, currentUser:IUser, callback: (err: object, user: IUser) => void) {
@@ -42,6 +43,7 @@ const UserService = {
     /**
      * Retrieves the user list
      * @param filter
+     * @param currentUser The connected user. Used to check if user is allowed to perform this action
      * @param callback (err, result:User[])
      */
     read(filter: IUser, currentUser:IUser, callback: (err: object, userList: IUser[]) => void) {
@@ -58,6 +60,7 @@ const UserService = {
     /**
      * Updates a user.
      * @param user
+     * @param currentUser The connected user. Used to check if user is allowed to perform this action
      * @param callback
      */
     update(user: IUser, currentUser:IUser, callback: (err: object, user: IUser) => void) {
@@ -94,6 +97,7 @@ const UserService = {
         User.deleteOne({_id: user._id}, {}, callback);
     },
 
+
     /**
      * Logs a user in. If successful returns full User instance, including apikey for further calls
      * @param user (login and password (set in the hash field))
@@ -103,29 +107,25 @@ const UserService = {
         User.findOne({login: user.login}, 'login salt hash name apikey admin', {},(err, userDB) => {
            if (err)
                return callback(err);
-           if (!userDB)
-               userDB = new User({salt: '$2b$10$m6HX0s25n9DrfVNNLnHSXu', hash:null}); // dummy user ! The user wasn't found but be proceed anyway...
-           // the salt/hash is unsolvable no matter what the input is, but we still compute the hash
-           // so that the time taken to handle a nonexistent user is the same as in the case on a wrong password
-           // hash password and compare
-           bcrypt.hash(user.hash, userDB.salt, (err, hash) => {
-               if (err)
-                   return callback(err);
-               if (hash === userDB.hash)
-               {
-                   // password is valid, logging in...
-                   const userResult:IUser = {
-                       _id: userDB._id,
-                       login: userDB.login,
-                       name: userDB.name,
-                       admin: userDB.admin,
-                       domain: user.domain,
-                       apikey: userDB.apikey
-                   };
-                   return callback(null, userResult);
-               }
-               return callback();  // no error, no user = invalid user or password
-           });
+           if (!userDB) {
+               // 2 cases : 1/ wrong user/pwd or 2/ we're on a new, empty db. Let's detect the latter and create our first user
+               User.countDocuments((error, result) => {
+                  if (result == 0) {
+                      // empty db ! Use provided credentials as first account. Make it an admin account
+                      console.log(`Empty db, creating first user ${user.login} as admin`);
+                      user.admin = true;
+                      this.create(user, {admin:true}, callback);
+                  } else {
+                      // else create a dummy user and proceed
+                      userDB = new User({salt: '$2b$10$m6HX0s25n9DrfVNNLnHSXu', hash:null}); // dummy user ! The user wasn't found but be proceed anyway...
+                      // the salt/hash is unsolvable no matter what the input is, but we still compute the hash
+                      // so that the time taken to handle a nonexistent user is the same as in the case on a wrong password
+                      this.checkPassword(user, userDB, callback);
+                  }
+               });
+           }
+           if (userDB)
+               this.checkPassword(user, userDB, callback);
         });
     },
 
@@ -140,6 +140,26 @@ const UserService = {
 
 
     // utilities
+    checkPassword: function (user, userDB: IUser & mongoose.Document<any, any, any>, callback) {
+        // hash password and compare
+        bcrypt.hash(user.hash, userDB.salt, (err, hash) => {
+            if (err)
+                return callback(err);
+            if (hash === userDB.hash) {
+                // password is valid, logging in...
+                const userResult: IUser = {
+                    _id: userDB._id,
+                    login: userDB.login,
+                    name: userDB.name,
+                    admin: userDB.admin,
+                    domain: user.domain,
+                    apikey: userDB.apikey
+                };
+                return callback(null, userResult);
+            }
+            return callback();  // no error, no user = invalid user or password
+        });
+    },
 
     saltHash(user, callback) {
         bcrypt.genSalt(saltRounds, function (err, salt) {
