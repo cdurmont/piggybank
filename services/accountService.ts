@@ -58,7 +58,8 @@ const AccountService = {
             iban: account.iban,
             parent: account.parent,
             type: account.type,
-            colorRevert: account.colorRevert
+            colorRevert: account.colorRevert,
+            reconcilable: account.reconcilable
         });
         if (!user.admin) {
             // if not an admin, user must have a W permission for this account to update

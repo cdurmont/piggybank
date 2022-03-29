@@ -18,6 +18,12 @@
         },
         "type": {
             "type": "string"
+        },
+        "colorRevert": {
+            "type": "boolean"
+        },
+        "reconcilable": {
+            "type": "boolean"
         }
     },
     "type": "object",
