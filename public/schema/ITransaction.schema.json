@@ -37,6 +37,9 @@
                     ],
                     "minItems": 0,
                     "type": "array"
+                },
+                "reconciled": {
+                    "type": "boolean"
                 }
             },
             "type": "object"

@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import ITransaction from "./ITransaction";
+
 const Schema = mongoose.Schema;
 
 const TransactionSchema = new Schema({
@@ -9,7 +10,8 @@ const TransactionSchema = new Schema({
     recurStartDate: {type: Date},
     recurEndDate: {type: Date},
     recurNextDate: {type: Date},
-    owner: {type: Schema.Types.ObjectId, ref: 'User'}   // Type Q only
+    owner: {type: Schema.Types.ObjectId, ref: 'User'},   // Type Q only
+    reconciled: {type: Boolean, default: false},
 }, {
     toJSON : { virtuals: true},
     toObject : { virtuals: true}

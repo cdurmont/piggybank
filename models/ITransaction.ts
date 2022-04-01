@@ -11,7 +11,8 @@ interface ITransaction {
     recurEndDate?: Date,
     recurNextDate?: Date,
     owner?: IUser,
-    entries?: IEntry[]
+    entries?: IEntry[],
+    reconciled?: boolean,
 }
 
 export default ITransaction;

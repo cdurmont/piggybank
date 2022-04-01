@@ -3,7 +3,6 @@ import IEntry from "../models/IEntry";
 import Entry from "../models/entry";
 import IUser from "../models/IUser";
 import PermissionService from "./permissionService";
-import Account from "../models/account";
 
 class EntryService  {
     static create(entry: IEntry, user:IUser, callback: (err: NativeError, entry: IEntry) => void): void {
@@ -25,23 +24,54 @@ class EntryService  {
         Entry.find(entryFilter).populate('transaction account').exec(callback);
     }
 
-    static readDetailed(entryFilter: IEntry, user:IUser, callback: (err: NativeError, trans: IEntry[]) => void):void {
+    static readDetailed(entryFilter: IEntry, reconciled: boolean, user:IUser, callback: (err: NativeError, trans: IEntry[]) => void):void {
         let accountId = entryFilter.account._id ? entryFilter.account._id : entryFilter.account;
         if (!user.admin) {
-            // if not an admin, user must have a W permission for this account to update
+            // if not an admin, user must have a W permission for this account to be read
             PermissionService.read({user: user, account: {_id: accountId}}, (err, perms) => {
                 if (perms && perms.length>0)
-                    this.readDetailedAllowed(entryFilter, user, callback);  // user allowed
+                    this.readDetailedAllowed(entryFilter, reconciled, user, callback);  // user allowed
                 else
                     callback({name: 'Permission denied', message:'User has no permission to read an entry on this account'}, null);
             });
         }
         else
-            this.readDetailedAllowed(entryFilter, user, callback);
+            this.readDetailedAllowed(entryFilter, reconciled, user, callback);
     }
 
-    private static readDetailedAllowed(entryFilter: IEntry, user:IUser, callback: (err: NativeError, trans: IEntry[]) => void):void {
+    private static readDetailedAllowed(entryFilter: IEntry, reconciled: boolean,user:IUser, callback: (err: NativeError, trans: IEntry[]) => void):void {
         let accountId = entryFilter.account._id ? entryFilter.account._id : entryFilter.account;
+        // let reconcileFilter = {"reconciled": { "$exists" : true}};
+        // if (!reconciled)
+        //     reconcileFilter = {"$eq": ["$reconciled", true]};
+        let matchAll = {
+            "$expr": {
+                "$and": [
+                    {
+                        // first condition : the join condition
+                        "$eq": ["$$txnId", "$_id"]
+                    },
+                    { // second condition : only Standard transactions
+                        "$eq": ["$type", "S"]
+                    }
+                ]
+            }
+        };
+        let matchUnreconciled = {
+            "reconciled": false,
+            "$expr": {
+                "$and": [
+                    {
+                        // first condition : the join condition
+                        "$eq": ["$$txnId", "$_id"]
+                    },
+                    { // second condition : only Standard transactions
+                        "$eq": ["$type", "S"]
+                    }
+                ]
+            }
+        };
+
         Entry.aggregate([
             {   // stage 1 : get entries of the desired account
                 "$match": {
@@ -58,19 +88,7 @@ class EntryService  {
                     },
                     "pipeline": [
                         {
-                            "$match": {
-                                "$expr": {
-                                    "$and": [
-                                        {
-                                            // first condition : the join condition
-                                            "$eq": ["$$txnId", "$_id"]
-                                        },
-                                        { // second condition : only Standard transactions
-                                            "$eq": ["$type", "S"]
-                                        }
-                                    ]
-                                }
-                            }
+                            "$match": reconciled ? matchAll : matchUnreconciled
                         }
                     ]
                 }

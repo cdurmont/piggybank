@@ -32,10 +32,9 @@ const TransactionService = {
             async.each(trans.entries,(entry, callbackEach) => {
                 // save entry
                 entry.transaction = newTrans;
-                EntryService.create(entry, user, (err, entry) => {
+                EntryService.create(entry, user, (err) => {
                     if (err)
                         return callbackEach(err);
-                    //newTrans.entries.push(entry);   // add new entry to resulting transaction
                     callbackEach();
                 })
             }, err => {
@@ -63,7 +62,8 @@ const TransactionService = {
             type: trans.type,
             recurStartDate: trans.recurStartDate,
             recurEndDate: trans.recurEndDate,
-            recurNextDate: trans.recurNextDate
+            recurNextDate: trans.recurNextDate,
+            reconciled: trans.reconciled,
         });
         Transaction.updateOne({_id: trans._id}, transUpdate, {}, callback);
     },
@@ -92,7 +92,7 @@ const TransactionService = {
            }
            trans.forEach(recurTxn => {
                // do we actually have something to do ?
-               if (recurTxn.recurNextDate.getTime() <= new Date().getTime()) {  // next occurence is in the past
+               if (recurTxn.recurNextDate.getTime() <= new Date().getTime()) {  // next occurrence is in the past
                    if (!recurTxn.recurEndDate || recurTxn.recurEndDate.getTime() >= recurTxn.recurNextDate.getTime()) { // no end date, or next occurrence before end date
                        // then definitely yes, we do have work to do !
                        let newTxn:ITransaction = {

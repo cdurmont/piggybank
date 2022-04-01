@@ -44,7 +44,10 @@ class EntryController  {
     }
 
     static readDetailed(req: Request, res: Response) {
-        let filter;
+        let reconciled:boolean = true;
+        if (req.query.reconciled === "false")
+            reconciled = false;
+        let filter={};
         try {
             filter = JSON.parse(<string>req.query.filter);
         }
@@ -57,7 +60,7 @@ class EntryController  {
         let entry:IEntry = filter;
 
         // @ts-ignore
-        EntryService.readDetailed(entry, req.user,(err, entries) => {
+        EntryService.readDetailed(entry, reconciled, req.user,(err, entries) => {
             if (err) {
                 console.error('Error reading entries (detailed), filter= ' + JSON.stringify(entry));
                 return res.status(400).json({error: 'Error reading entries (detailed)', detail: err});
