@@ -13,7 +13,7 @@ import AssociationController from "../controllers/associationController";
 
 // API version
 router.get('/version', (req, res) => {
-    res.send('{"version" : "v1.0"}') ;
+    res.send('{"version" : "v1.0.1"}') ;
     // res.json(config);
 });
 
