@@ -70,4 +70,10 @@ public class EntryService {
         return Panache.withTransaction(() ->
                 Entry.delete("instance.id=:instance_id and id=:id", Parameters.with("instance_id",instanceId).and("id",id)));
     }
+
+    public Uni<Long> delete(Long instanceId, List<Long> ids) {
+        return Panache.withTransaction(() ->
+                Entry.delete("instance.id=:instance_id and id in :ids", Parameters.with("instance_id",instanceId).and("ids",ids)));
+    }
+
 }

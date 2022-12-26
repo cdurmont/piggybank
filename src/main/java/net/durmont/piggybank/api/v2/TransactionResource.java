@@ -51,6 +51,7 @@ public class TransactionResource extends RestResource{
     @Path("{id}")
     @GET
     @RolesAllowed("user")
+    @JsonView(Views.IncludeOneToMany.class)
     public Uni<Response> readOne(@RestPath("instance") Long instance,
                                  @RestPath("id") Long id) {
         return transactionService.findById(instance, id)

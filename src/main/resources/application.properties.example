@@ -1,0 +1,20 @@
+quarkus.http.host=0.0.0.0
+
+# Postgresql
+quarkus.datasource.db-kind = postgresql
+quarkus.datasource.username = postgres
+quarkus.datasource.password = postgres
+quarkus.datasource.reactive.url = vertx-reactive:postgresql://localhost:5432/postgres
+# `drop-and-create` drop and create the database at startup (use `update` to only update the schema)
+quarkus.hibernate-orm.database.generation=update
+
+# OpenID
+quarkus.oidc.auth-server-url=https://keycloak-server/realms/myrealm
+quarkus.oidc.client-id=piggybank-back
+quarkus.oidc.credentials.secret=some-secret
+
+# Docker
+quarkus.container-image.group=cdurmont
+quarkus.container-image.name=piggybank-back
+quarkus.container-image.tag=latest
+quarkus.docker.dockerfile-native-path=src/main/docker/Dockerfile.native-micro

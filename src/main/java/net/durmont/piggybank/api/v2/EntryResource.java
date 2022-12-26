@@ -3,6 +3,7 @@ package net.durmont.piggybank.api.v2;
 import io.quarkus.hibernate.reactive.rest.data.panache.PanacheEntityResource;
 import io.quarkus.rest.data.panache.ResourceProperties;
 import io.smallrye.mutiny.Uni;
+import net.durmont.piggybank.model.Account;
 import net.durmont.piggybank.model.Entry;
 import net.durmont.piggybank.model.Instance;
 import net.durmont.piggybank.model.Transaction;
@@ -11,7 +12,9 @@ import org.jboss.resteasy.reactive.RestPath;
 
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 import java.net.URI;
@@ -31,5 +34,26 @@ public class EntryResource extends RestResource {
                 .onItem().ifNotNull().transform( inserted -> Response.created(URI.create("/api-v2/"+instance+"/entries/"+inserted.id)).build() )
                 .onItem().ifNull().continueWith(Response.ok().status(Response.Status.PRECONDITION_FAILED).build());
     }
+
+
+    @Path("{id}")
+    @PUT
+    @RolesAllowed("user")
+    public Uni<Response> update(@RestPath("instance") Long instance, Long id, Entry entry) {
+        return entryService.update(instance, id, entry)
+                .onItem().ifNotNull().transform(acc -> Response.ok(acc).build())
+                .onItem().ifNull().continueWith(Response.ok().status(Response.Status.NOT_FOUND).build());
+    }
+
+    @Path("{id}")
+    @DELETE
+    @RolesAllowed("user")
+    public Uni<Response> delete(@RestPath("instance") Long instance, Long id) {
+        return entryService.delete(instance, id)
+                .map(result -> result != null && result == 1L ?
+                        Response.ok().status(Response.Status.NO_CONTENT).build() :
+                        Response.ok().status(Response.Status.NOT_FOUND).build());
+    }
+
 
 }
