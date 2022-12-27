@@ -1,9 +1,6 @@
 package net.durmont.piggybank.model;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.quarkus.logging.Log;
 import net.durmont.piggybank.Views;
 
 import javax.persistence.*;
@@ -42,6 +39,9 @@ public class Transaction extends ConvertedEntity{
     public List<Entry> entries;
 
 
+    /**
+     *
+     */
     public Transaction() {
     }
 
@@ -87,8 +87,8 @@ public class Transaction extends ConvertedEntity{
 
     @Override
     public void setDefaults() {
-        balanced = true;
-        reconciled = false;
-        type = "S";
+        if (balanced == null) balanced = true;
+        if (reconciled == null) reconciled = false;
+        if (type == null) type = "S";
     }
 }

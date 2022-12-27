@@ -10,7 +10,6 @@ import net.durmont.piggybank.model.Entry;
 import net.durmont.piggybank.model.Instance;
 import net.durmont.piggybank.model.Transaction;
 import org.apache.commons.beanutils.BeanUtils;
-import org.hibernate.reactive.mutiny.Mutiny;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -28,8 +27,17 @@ public class TransactionService {
         if (newTxn.instance == null)
             newTxn.instance = new Instance();
         newTxn.instance.id = instanceId;
-        // TODO changement de plan : revenir au système "persist de transaction => persist des écritures de la txn"
-        return Panache.withTransaction(newTxn::persist);
+        return Panache.<Transaction>withTransaction(newTxn::persist)    // 1. create new Transaction
+                .chain(txnDb -> {                                       // 2. create entries and link them to the Transaction
+                    List<Uni<Entry>> unis = new ArrayList<>();
+                    if (txnDb != null && txnDb.entries != null)
+                        unis.addAll(txnDb.entries.stream().map(entry -> {
+                            entry.transaction = txnDb;
+                            return entryService.create(instanceId, entry);
+                        }).collect(Collectors.toList()));
+                    return Uni.join().all(unis).andFailFast();
+                })
+                .map( unisResults -> unisResults.get(0).transaction);   // 3. get persisted Transaction from first Entry
     }
 
     public Uni<List<Transaction>> list(Long instanceId, Transaction filter, Sort sort, Page page) {
@@ -77,10 +85,10 @@ public class TransactionService {
     /**
      * Updates the full transaction, including entries
      * Upon update, entries are deleted and recreated
-     * @param instanceId
-     * @param id
-     * @param txn
-     * @return
+     * @param instanceId target instance's id
+     * @param id id of Transaction to update
+     * @param txn Transaction object containing changes to be applied
+     * @return updated Transaction, or null in case of an error, or if there's something wrong with instance ids
      */
     public Uni<Transaction> update(Long instanceId, Long id, Transaction txn) {
         txn.id=id;
@@ -118,24 +126,7 @@ public class TransactionService {
                         })    // the last mapping is somewhat bogus, if we made it to this point without failing, we assume everything is ok, and txn is returned (txnDb would be more accurate...)
         );
     }
-    public Uni<Transaction> updateTxnOnly(Long instanceId, Long id, Transaction txn) {
-        txn.id=id;
-        txn.setDefaults();
-        return Panache.withTransaction(
-                ()-> Transaction.<Transaction>findById(id)
-                        .map(txnDb -> {
-                            if (txnDb != null && txnDb.instance != null && !Objects.equals(instanceId, txnDb.instance.id))
-                                return null;
-                            txn.instance = txnDb.instance;
-                            try {
-                                BeanUtils.copyProperties(txnDb, txn);
-                            } catch (IllegalAccessException | InvocationTargetException e) {
-                                Log.error("Error copying new properties of Transaction "+id, e);
-                            }
-                            return txnDb;
-                        })
-        );
-    }
+
 
     public Uni<Long> delete(Long instanceId, Long id) {
         return Panache.withTransaction(
