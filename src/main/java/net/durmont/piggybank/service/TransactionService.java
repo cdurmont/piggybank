@@ -14,6 +14,9 @@ import org.apache.commons.beanutils.BeanUtils;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.lang.reflect.InvocationTargetException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -140,4 +143,91 @@ public class TransactionService {
                         .chain(() -> Transaction.delete("instance.id=:instance_id and id=:id", Parameters.with("instance_id",instanceId).and("id",id))) // 3.delete transaction
                 );
     }
+
+    public Uni<List<Transaction>> listPendingRecurring() {
+        Map<String, Object> params = new HashMap<>();
+        String query ="select t from Transaction t join fetch t.entries where 1=1";
+        query+=" AND t.type = :type";
+        params.put("type", "R");
+        query+=" AND t.recurStartDate < :now";
+        params.put("now", LocalDate.now());
+        query+=" AND (t.recurEndDate is null or t.recurEndDate > :now)";
+        query+=" AND t.recurNextDate is not null";
+        query+=" AND t.recurNextDate < :now";
+
+        return Transaction.<Transaction>find(query, params)
+                .list()
+                .map(txns -> new ArrayList<>(new HashSet<>(txns))); // quick deduplication, as the query strangely returns as many references to a transaction than the number of entries within
+    }
+
+    public Uni<List<Transaction>> generateRecurring() {
+        return         Panache.withTransaction(() ->
+                listPendingRecurring()
+                        .chain(transactions -> {
+                            List<Uni<Transaction>> uniTxns = new ArrayList<>();
+                            if (transactions != null) {
+                                for (Transaction txnRecur : transactions) {
+                                    Transaction txnInstance = createInstance(txnRecur);
+                                    txnRecur.recurNextDate = getNextDate(txnRecur); // FIXME Quarkus bug ???
+                                    uniTxns.add(create(txnInstance.instance.id, txnInstance));
+                                }
+                            }
+                            return Uni.join().all(uniTxns).andFailFast();    // 2. persist new standard txns
+                        })
+//                        .chain(transactions -> listPendingRecurring())
+//                        .chain(transactions -> {
+//                            List<Uni<Transaction>> uniTxns = new ArrayList<>();
+//                            if (transactions != null) {
+//                                for (Transaction txnRecur : transactions) {
+//                                    Transaction txnModif = new Transaction(txnRecur);
+//                                    txnModif.recurNextDate = getNextDate(txnModif);  // update recurring txns with new recurNextDate
+//                                    uniTxns.add(update(txnRecur.instance.id, txnRecur.id, txnModif));
+//                                }
+//                            }
+//                            return Uni.join().all(uniTxns).andFailFast();
+//                        })
+        );
+    }
+    public Uni<List<Transaction>> updateRecurringNextDate() {
+        return         Panache.withTransaction(() ->
+                listPendingRecurring()
+                        .map(transactions -> {
+                            if (transactions != null) {
+                                for (Transaction txnRecur : transactions) {
+                                    txnRecur.recurNextDate = getNextDate(txnRecur);  // update recurring txns with new recurNextDate
+                                }
+                            }
+                            return transactions;
+                        })
+        );
+    }
+
+    private LocalDate getNextDate(Transaction txnRecur) {
+        if (txnRecur.recurNextDate != null) {
+            LocalDate newRecurNextDate = txnRecur.recurNextDate.plusMonths(1);
+            if (txnRecur.recurEndDate == null || newRecurNextDate.isBefore(txnRecur.recurEndDate))  // apply new date if consistent with recurEndDate
+                return newRecurNextDate;
+
+        }
+        return null;
+    }
+
+    private Transaction createInstance(Transaction txnRecur) {
+        Transaction txnInstance = new Transaction(txnRecur);
+        LocalDate instanceDate = txnRecur.recurNextDate;
+        if (txnInstance.entries != null)
+            for (Entry e : txnInstance.entries)
+                e.date = Date.from(instanceDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+        txnInstance.type = "S";
+        txnInstance.recurStartDate = null;
+        txnInstance.recurNextDate = null;
+        txnInstance.recurEndDate = null;
+        if (txnInstance.description == null)
+            txnInstance.description = "";
+        txnInstance.description += " (" + instanceDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))  + ")";
+
+        return txnInstance;
+    }
+
 }

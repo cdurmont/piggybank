@@ -1,12 +1,8 @@
 package net.durmont.piggybank.api.v2;
 
-import io.quarkus.hibernate.reactive.rest.data.panache.PanacheEntityResource;
-import io.quarkus.rest.data.panache.ResourceProperties;
 import io.smallrye.mutiny.Uni;
-import net.durmont.piggybank.model.Account;
 import net.durmont.piggybank.model.Entry;
 import net.durmont.piggybank.model.Instance;
-import net.durmont.piggybank.model.Transaction;
 import net.durmont.piggybank.service.EntryService;
 import org.jboss.resteasy.reactive.RestPath;
 

@@ -5,11 +5,12 @@ import net.durmont.piggybank.Views;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 @Entity
-public class Transaction extends ConvertedEntity{
+public class Transaction extends ConvertedEntity implements Cloneable{
 
     @JsonView(Views.Standard.class)
     @ManyToOne(targetEntity = Instance.class)
@@ -47,6 +48,30 @@ public class Transaction extends ConvertedEntity{
 
     public Transaction(String json) {
         super(json);
+    }
+
+    /**
+     * Acts as a custom clone()
+     * @param modele Transaction to copy
+     */
+    public Transaction(Transaction modele) {
+        instance = modele.instance;
+        description = modele.description;
+        type = modele.type;
+        balanced = modele.balanced;
+        reconciled = modele.reconciled;
+        owner = modele.owner;
+        recurStartDate = modele.recurStartDate;
+        recurNextDate = modele.recurNextDate;
+        recurEndDate = modele.recurEndDate;
+        if (modele.entries != null) {
+            entries = new ArrayList<>();
+            for (Entry e : modele.entries) {
+                Entry copyEntry = new Entry(e);
+                copyEntry.transaction = this;
+                entries.add(copyEntry);
+            }
+        }
     }
 
     @Override
@@ -90,5 +115,20 @@ public class Transaction extends ConvertedEntity{
         if (balanced == null) balanced = true;
         if (reconciled == null) reconciled = false;
         if (type == null) type = "S";
+    }
+
+    @Override
+    public Transaction clone() throws CloneNotSupportedException {
+        Transaction cloneTxn = (Transaction) super.clone();
+        cloneTxn.id = null;
+        if (entries != null) {
+            cloneTxn.entries = new ArrayList<>();
+            for (Entry e: entries) {
+                Entry cloneEntry = e.clone();
+                cloneEntry.transaction = cloneTxn;
+                cloneTxn.entries.add(cloneEntry);
+            }
+        }
+        return cloneTxn;
     }
 }

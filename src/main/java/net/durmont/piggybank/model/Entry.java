@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.Objects;
 
 @Entity
-public class Entry extends ConvertedEntity{
+public class Entry extends ConvertedEntity implements Cloneable{
 
     @ManyToOne(targetEntity = Instance.class)
     public Instance instance;
@@ -31,6 +31,21 @@ public class Entry extends ConvertedEntity{
 
     public Entry(String json) {
         super(json);
+    }
+
+    /**
+     * Acts as a custom clone
+     * @param e Entry to copy
+     */
+    public Entry(Entry e) {
+        instance = e.instance;
+        date = e.date;
+        account = e.account;
+        transaction = e.transaction;
+        debit = e.debit;
+        credit = e.credit;
+        reference = e.reference;
+        description =e.description;
     }
 
     @Override
@@ -79,5 +94,11 @@ public class Entry extends ConvertedEntity{
         return balance;
     }
 
-
+    @Override
+    protected Entry clone() throws CloneNotSupportedException {
+        Entry clone = (Entry) super.clone();
+        clone.id = null;
+        clone.date = new Date();
+        return clone;
+    }
 }
