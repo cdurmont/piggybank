@@ -1,6 +1,7 @@
 package net.durmont.piggybank.service;
 
 import io.quarkus.hibernate.reactive.panache.Panache;
+import io.quarkus.hibernate.reactive.panache.common.runtime.ReactiveTransactional;
 import io.quarkus.logging.Log;
 import io.quarkus.panache.common.Page;
 import io.quarkus.panache.common.Parameters;
@@ -15,7 +16,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -43,33 +43,53 @@ public class TransactionService {
                 .map( unisResults -> unisResults.get(0).transaction);   // 3. get persisted Transaction from first Entry
     }
 
+    @ReactiveTransactional
+    public Uni<List<Transaction>> createMany(Long instanceId, List<Transaction> txns) {
+        List<Uni<Transaction>> uniTxns = new ArrayList<>();
+        for (Transaction txn : txns) {
+            uniTxns.add(create(instanceId, txn));
+        }
+        return Uni.combine().all().unis(uniTxns).combinedWith(txnsDb -> (List<Transaction>) txnsDb);
+    }
+
+
     public Uni<List<Transaction>> list(Long instanceId, Transaction filter, Sort sort, Page page) {
         Map<String, Object> params = new HashMap<>();
-        String query ="1=1";
-        query+=" AND instance.id=:instance_id";
+        String query ="select t from Transaction t join fetch t.entries where 1=1";
+        query+=" AND t.instance.id=:instance_id";
         params.put("instance_id", instanceId);
         if (filter != null) {
             if (filter.balanced!= null) {
-                query+=" AND balanced=:balanced";
+                query+=" AND t.balanced=:balanced";
                 params.put("balanced", filter.balanced);
             }
             if (filter.reconciled!= null) {
-                query+=" AND reconciled=:reconciled";
+                query+=" AND t.reconciled=:reconciled";
                 params.put("reconciled", filter.reconciled);
             }
             if (filter.type != null) {
-                query+=" AND type=:type";
+                query+=" AND t.type=:type";
                 params.put("type", filter.type);
             }
             if (filter.owner != null && filter.owner.id != null) {
-                query+=" AND owner.id=:owner_id";
+                query+=" AND t.owner.id=:owner_id";
                 params.put("owner_id", filter.owner.id);
             }
 
         }
-        return Transaction.find(query, sort, params)
+        return Transaction.<Transaction>find(query, sort, params)
                 .page(page)
-                .list();
+                .list()
+                .map(txns -> {
+                    if (txns != null)
+                        for (Transaction txn : txns) {
+                            if (txn.entries != null)
+                                for (Entry e : txn.entries) {
+                                    e.transaction = null;   // break recursion in JSON rendering
+                                }
+                        }
+                    return txns;
+                });
     }
 
     public Uni<Transaction> findById(Long instanceId, Long id) {
@@ -217,7 +237,7 @@ public class TransactionService {
         LocalDate instanceDate = txnRecur.recurNextDate;
         if (txnInstance.entries != null)
             for (Entry e : txnInstance.entries)
-                e.date = Date.from(instanceDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                e.setDateFromLocalDate(instanceDate);
 
         txnInstance.type = "S";
         txnInstance.recurStartDate = null;

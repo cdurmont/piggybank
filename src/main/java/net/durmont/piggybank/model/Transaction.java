@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity
-public class Transaction extends ConvertedEntity implements Cloneable{
+public class Transaction extends ConvertedEntity {
 
     @JsonView(Views.Standard.class)
     @ManyToOne(targetEntity = Instance.class)
@@ -117,18 +117,5 @@ public class Transaction extends ConvertedEntity implements Cloneable{
         if (type == null) type = "S";
     }
 
-    @Override
-    public Transaction clone() throws CloneNotSupportedException {
-        Transaction cloneTxn = (Transaction) super.clone();
-        cloneTxn.id = null;
-        if (entries != null) {
-            cloneTxn.entries = new ArrayList<>();
-            for (Entry e: entries) {
-                Entry cloneEntry = e.clone();
-                cloneEntry.transaction = cloneTxn;
-                cloneTxn.entries.add(cloneEntry);
-            }
-        }
-        return cloneTxn;
-    }
+
 }

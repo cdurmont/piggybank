@@ -1,10 +1,8 @@
 package net.durmont.piggybank.api.v2;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import io.quarkus.logging.Log;
 import io.smallrye.mutiny.Uni;
 import net.durmont.piggybank.Views;
-import net.durmont.piggybank.model.Account;
 import net.durmont.piggybank.model.Instance;
 import net.durmont.piggybank.model.Transaction;
 import net.durmont.piggybank.service.TransactionService;
@@ -36,7 +34,7 @@ public class TransactionResource extends RestResource{
 
     @GET
     @RolesAllowed("user")
-    @JsonView(Views.Standard.class)
+    @JsonView(Views.IncludeOneToMany.class)
     public Uni<List<Transaction>> read(@RestPath("instance") Long instance,
                                    @RestQuery("filter") Transaction filter,
                                    @RestQuery("sort") List<String> sortQuery,

@@ -16,6 +16,7 @@
     <skipITs>true</skipITs>
     <surefire-plugin.version>3.0.0-M7</surefire-plugin.version>
   </properties>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -86,6 +87,11 @@
       <groupId>commons-beanutils</groupId>
       <artifactId>commons-beanutils</artifactId>
       <version>1.9.4</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.squirrelgrip</groupId>
+      <artifactId>qif4j</artifactId>
+      <version>1.0.3-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>

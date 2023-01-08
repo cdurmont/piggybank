@@ -2,6 +2,8 @@ package net.durmont.piggybank.model;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.Objects;
 
@@ -48,6 +50,9 @@ public class Entry extends ConvertedEntity implements Cloneable{
         description =e.description;
     }
 
+    public void setDateFromLocalDate(LocalDate localDate) {
+        date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
