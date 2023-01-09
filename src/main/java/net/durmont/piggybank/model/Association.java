@@ -10,6 +10,8 @@ public class Association extends ConvertedEntity {
     public String regex;
     @ManyToOne(targetEntity = Account.class)
     public Account account;
+    @ManyToOne(targetEntity = Instance.class)
+    public Instance instance;
     public String mongoId;
 
     public Association() {

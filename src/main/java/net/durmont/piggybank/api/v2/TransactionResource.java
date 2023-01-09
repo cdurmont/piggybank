@@ -39,7 +39,7 @@ public class TransactionResource extends RestResource{
                                    @RestQuery("filter") Transaction filter,
                                    @RestQuery("sort") List<String> sortQuery,
                                    @RestQuery("page") @DefaultValue("0") int pageIndex,
-                                   @RestQuery("size") @DefaultValue("20") int pageSize) {
+                                   @RestQuery("size") @DefaultValue("1000") int pageSize) {
 
         return transactionService.list(instance, filter, buildSort(sortQuery), buildPage(pageIndex, pageSize));
     }

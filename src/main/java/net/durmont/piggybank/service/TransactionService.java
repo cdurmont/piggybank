@@ -191,8 +191,10 @@ public class TransactionService {
                                     txnRecur.recurNextDate = getNextDate(txnRecur); // FIXME Quarkus bug ???
                                     uniTxns.add(create(txnInstance.instance.id, txnInstance));
                                 }
+                                return Uni.join().all(uniTxns).andFailFast();    // 2. persist new standard txns
                             }
-                            return Uni.join().all(uniTxns).andFailFast();    // 2. persist new standard txns
+                            else
+                                return Uni.createFrom().nullItem();
                         })
 //                        .chain(transactions -> listPendingRecurring())
 //                        .chain(transactions -> {
