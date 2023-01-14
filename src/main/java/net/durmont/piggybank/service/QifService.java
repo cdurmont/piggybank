@@ -48,7 +48,7 @@ public class QifService {
         txn.entries = new ArrayList<>();
         txn.entries.add(entry);
         entry.transaction = txn;
-        entry.description = qifTransaction.getMemo();
+        entry.reference = qifTransaction.getMemo();
         entry.account = new Account();
         entry.account.id = accountId;
         entry.setDateFromLocalDate(qifTransaction.getDate());

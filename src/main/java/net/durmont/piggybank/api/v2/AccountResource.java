@@ -29,7 +29,7 @@ public class AccountResource extends RestResource {
                               @RestQuery("filter") Account filter,
                               @RestQuery("sort") List<String> sortQuery,
                               @RestQuery("page") @DefaultValue("0") int pageIndex,
-                              @RestQuery("size") @DefaultValue("20") int pageSize) {
+                              @RestQuery("size") @DefaultValue("200") int pageSize) {
 
         Sort sort = buildSort(sortQuery);
         if (sort.getColumns().size() == 0)
