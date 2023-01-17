@@ -1,31 +1,17 @@
 package net.durmont.piggybank.model;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.quarkus.logging.Log;
-import io.quarkus.panache.common.Page;
-import io.quarkus.panache.common.Sort;
-import io.smallrye.mutiny.Uni;
-import net.durmont.piggybank.service.AccountService;
-import org.apache.commons.beanutils.BeanUtils;
-
-import javax.inject.Inject;
 import javax.persistence.*;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 @Entity
 @NamedQueries({
-        @NamedQuery(name = "balance", query = "select sum(e.debit)-sum(e.credit) " +
+        @NamedQuery(name = "balance", query = "select coalesce(sum(e.debit),0)-coalesce(sum(e.credit),0) " +
                 "from Entry e join e.transaction t " +
                 "where e.account.id IN :accountIds " +
                 "and t.type = 'S'")
 })
 public class Account extends ConvertedEntity implements Cloneable, Comparable<Account> {
-
-    @Inject
-    static AccountService accountService;
 
     @ManyToOne(targetEntity = Instance.class)
     public Instance instance;
@@ -67,8 +53,7 @@ public class Account extends ConvertedEntity implements Cloneable, Comparable<Ac
 
     @Override
     public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
-        return result;
+        return id != null ? id.hashCode() : 0;
     }
 
     public Long getId() {
@@ -77,7 +62,7 @@ public class Account extends ConvertedEntity implements Cloneable, Comparable<Ac
 
     @Override
     public Account clone()  {
-        Account clone= null;
+        Account clone;
         try {
             clone = (Account) super.clone();
         } catch (CloneNotSupportedException e) {

@@ -109,12 +109,14 @@ public class AccountService {
 
     public Uni<BigDecimal> balance(Long instanceId, @NotNull Long id) {
         // call accountCache, get ids of subaccounts
-        return Account.getSession().onItem().transformToUni(
-                session -> getChildrenAccountIds(instanceId, id).onItem().transformToUni(
-                        ids -> {
-                            ids.add(id);    // add main account's id too
-                            return session.<BigDecimal>createNamedQuery("balance").setParameter("accountIds", ids).getSingleResult();
-                        }));
+        return Account.getSession()
+                .chain(
+                    session -> getChildrenAccountIds(instanceId, id).onItem().transformToUni(
+                            ids -> {
+                                ids.add(id);    // add main account's id too
+                                return session.<BigDecimal>createNamedQuery("balance").setParameter("accountIds", ids).getSingleResult();
+                            }))
+                ;
     }
 
     private List<Account> relinkAccounts(List<Account> accounts) {
