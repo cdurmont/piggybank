@@ -10,6 +10,7 @@ import io.smallrye.mutiny.Uni;
 import net.durmont.piggybank.model.Account;
 import net.durmont.piggybank.model.Entry;
 import net.durmont.piggybank.model.Instance;
+import net.durmont.piggybank.model.Stat;
 import org.apache.commons.beanutils.BeanUtils;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -111,11 +112,23 @@ public class AccountService {
         // call accountCache, get ids of subaccounts
         return Account.getSession()
                 .chain(
-                    session -> getChildrenAccountIds(instanceId, id).onItem().transformToUni(
-                            ids -> {
-                                ids.add(id);    // add main account's id too
-                                return session.<BigDecimal>createNamedQuery("balance").setParameter("accountIds", ids).getSingleResult();
-                            }))
+                        session -> getChildrenAccountIds(instanceId, id).onItem().transformToUni(
+                                ids -> {
+                                    ids.add(id);    // add main account's id too
+                                    return session.<BigDecimal>createNamedQuery("balance").setParameter("accountIds", ids).getSingleResult();
+                                }))
+                ;
+    }
+
+    public Uni<List<Stat>> stats(Long instanceId, @NotNull Long id) {
+        // call accountCache, get ids of subaccounts
+        return Account.getSession()
+                .chain(
+                        session -> getChildrenAccountIds(instanceId, id).onItem().transformToUni(
+                                ids -> {
+                                    ids.add(id);    // add main account's id too
+                                    return session.createNamedQuery("stats", Stat.class).setParameter("accountIds", ids).getResultList();
+                                }))
                 ;
     }
 

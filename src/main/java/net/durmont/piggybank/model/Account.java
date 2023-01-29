@@ -9,7 +9,14 @@ import java.util.*;
         @NamedQuery(name = "balance", query = "select coalesce(sum(e.debit),0)-coalesce(sum(e.credit),0) " +
                 "from Entry e join e.transaction t " +
                 "where e.account.id IN :accountIds " +
-                "and t.type = 'S'")
+                "and t.type = 'S'"),
+        @NamedQuery(name = "stats", query = "select new net.durmont.piggybank.model.Stat(year(e.date), month(e.date), coalesce(sum(e.debit),0),coalesce(sum(e.credit),0)) " +
+                "from Entry e join e.transaction t " +
+                "where e.account.id IN :accountIds " +
+                "and t.type = 'S' " +
+                "group by year(e.date), month(e.date) " +
+                "order by year(e.date), month(e.date) "),
+
 })
 public class Account extends ConvertedEntity implements Cloneable, Comparable<Account> {
 
@@ -24,6 +31,8 @@ public class Account extends ConvertedEntity implements Cloneable, Comparable<Ac
     public Boolean colorRevert;
     public Boolean reconcilable;
     public String mongoId;
+    public String color;
+    public String icon;
 
     @Transient
     public Boolean root;
@@ -39,6 +48,8 @@ public class Account extends ConvertedEntity implements Cloneable, Comparable<Ac
     public void setDefaults() {
         if (colorRevert == null) colorRevert = false;
         if (reconcilable == null) reconcilable = false;
+        if (color == null) color = "blue";
+        if (icon == null) icon = "pi pi-tag";
     }
 
     @Override

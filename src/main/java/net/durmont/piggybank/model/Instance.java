@@ -12,6 +12,10 @@ public class Instance extends PanacheEntity {
 
     public String name;
 
+    public Instance() {}
+    public Instance(Long id) {
+        this.id = id;
+    }
 
     public static Instance valueOf(String json) {
         Instance instance = null;

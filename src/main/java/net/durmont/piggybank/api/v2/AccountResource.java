@@ -4,6 +4,7 @@ package net.durmont.piggybank.api.v2;
 import io.quarkus.panache.common.Sort;
 import io.smallrye.mutiny.Uni;
 import net.durmont.piggybank.model.Entry;
+import net.durmont.piggybank.model.Stat;
 import net.durmont.piggybank.service.AccountService;
 import net.durmont.piggybank.model.Account;
 import org.jboss.resteasy.reactive.RestPath;
@@ -63,6 +64,13 @@ public class AccountResource extends RestResource {
     @RolesAllowed("user")
     public Uni<BigDecimal> balance(@RestPath("instance") Long instance, Long id) {
         return accountService.balance(instance,id);
+    }
+
+    @Path("{id}/stats")
+    @GET
+    @RolesAllowed("user")
+    public Uni<List<Stat>> stats(@RestPath("instance") Long instance, Long id) {
+        return accountService.stats(instance,id);
     }
 
     @Path("tree")
