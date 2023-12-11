@@ -13,6 +13,6 @@ public class VersionResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Version Version() {
-        return new Version("v2.1.0");
+        return new Version("v2.3.1");
     }
 }

@@ -39,6 +39,12 @@ public class Transaction extends ConvertedEntity {
     @OneToMany(targetEntity = Entry.class, mappedBy = "transaction", fetch = FetchType.LAZY)
     public List<Entry> entries;
 
+    @JsonView(Views.Standard.class)
+    public String txnBankId;
+
+    @JsonView(Views.Standard.class)
+    @Lob
+    public String additionalData;
 
     /**
      *

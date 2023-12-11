@@ -37,7 +37,7 @@ public class User extends ConvertedEntity {
 
     @Override
     public int hashCode() {
-        int result = (admin ? 1 : 0);
+        int result = ((admin != null && admin == Boolean.TRUE) ? 1 : 0);
         result = 31 * result + (login != null ? login.hashCode() : 0);
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (mongoId != null ? mongoId.hashCode() : 0);

@@ -75,6 +75,10 @@ public class TransactionService {
                 query+=" AND t.owner.id=:owner_id";
                 params.put("owner_id", filter.owner.id);
             }
+            if (filter.txnBankId != null) {
+                query+=" AND t.txnBankId = :txnBankId";
+                params.put("txnBankId", filter.txnBankId);
+            }
 
         }
         return Transaction.<Transaction>find(query, sort, params)

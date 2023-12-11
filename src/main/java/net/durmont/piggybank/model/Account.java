@@ -26,6 +26,8 @@ public class Account extends ConvertedEntity implements Cloneable, Comparable<Ac
     public String type;
     public String name;
     public String externalRef;
+    // stores the Piggybank-Link linked account reference
+    public String linkId;
     @ManyToOne(targetEntity = Account.class)
     public Account parent;
     public Boolean colorRevert;

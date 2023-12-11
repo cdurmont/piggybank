@@ -1,5 +1,6 @@
 package net.durmont.piggybank.service;
 
+import io.quarkus.cache.CacheInvalidate;
 import io.quarkus.cache.CacheResult;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.logging.Log;
@@ -97,7 +98,6 @@ public class AccountService {
     }
 
 
-    @CacheResult(cacheName = "accounts-cache")
     public Uni<List<Account>> getAllAccounts(Long instanceId) {
 
         return Account.<Account>listAll()
@@ -194,6 +194,7 @@ public class AccountService {
         );
     }
 
+    @CacheInvalidate(cacheName = "accounts-cache")
     public Uni<Long> delete(Long instanceId, Long id) {
         return Panache.withTransaction(() ->
                 Account.delete("instance.id=:instance_id and id=:id", Parameters.with("instance_id",instanceId).and("id",id)));
@@ -236,5 +237,17 @@ public class AccountService {
                         endIndex = entries.size();
                     return entries.subList(startIndex, endIndex);
                 });
+    }
+
+    public Uni<List<Account>> listLinked(Long instanceId, Sort sort, Page page) {
+        Map<String, Object> params = new HashMap<>();
+        String query ="1=1";
+        query+=" AND instance.id=:instance_id";
+        params.put("instance_id", instanceId);
+        query+=" AND linkId IS NOT NULL";
+
+        return Account.find(query, sort, params)
+                .page(page)
+                .list();
     }
 }

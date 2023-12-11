@@ -33,9 +33,23 @@ public class AccountResource extends RestResource {
                               @RestQuery("size") @DefaultValue("200") int pageSize) {
 
         Sort sort = buildSort(sortQuery);
-        if (sort.getColumns().size() == 0)
+        if (sort.getColumns().isEmpty())
             sort.and("name");
         return accountService.list(instance, filter, sort, buildPage(pageIndex, pageSize));
+    }
+
+    @Path("linked")
+    @GET
+    @RolesAllowed("user")
+    public Uni<List<Account>> readLinked( @RestPath("instance") Long instance,
+                                    @RestQuery("sort") List<String> sortQuery,
+                                    @RestQuery("page") @DefaultValue("0") int pageIndex,
+                                    @RestQuery("size") @DefaultValue("200") int pageSize) {
+
+        Sort sort = buildSort(sortQuery);
+        if (sort.getColumns().isEmpty())
+            sort.and("name");
+        return accountService.listLinked(instance, sort, buildPage(pageIndex, pageSize));
     }
 
     @Path("{id}/entries")
