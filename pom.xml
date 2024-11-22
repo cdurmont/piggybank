@@ -103,6 +103,10 @@
       <artifactId>qif4j</artifactId>
       <version>1.0.3-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>org.jetbrains</groupId>
+      <artifactId>annotations</artifactId>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

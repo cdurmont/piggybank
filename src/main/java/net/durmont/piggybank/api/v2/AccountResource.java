@@ -69,8 +69,8 @@ public class AccountResource extends RestResource {
     public Uni<Response> readOne(@RestPath("instance") Long instance,
                                 @RestPath("id") Long id) {
         return accountService.findById(instance, id)
-                .onItem().ifNotNull().transform(account -> Response.ok(account).status(Response.Status.OK).build())
-                .onItem().ifNull().continueWith(() -> Response.ok().status(Response.Status.NOT_FOUND).build());
+                .onItem().ifNotNull().transform(account -> Response.ok(account).build())
+                .onItem().ifNull().continueWith(() -> Response.status(Response.Status.NOT_FOUND).build());
     }
 
     @Path("{id}/balance")
@@ -101,7 +101,7 @@ public class AccountResource extends RestResource {
     public Uni<Response> create(@RestPath("instance") Long instance, Account newAccount) {
         return accountService.create(instance, newAccount)
                 .onItem().ifNotNull().transform( inserted -> Response.created(URI.create("/api-v2/"+instance+"/accounts/"+inserted.id)).build() )
-                .onItem().ifNull().continueWith(Response.ok().status(Response.Status.PRECONDITION_FAILED).build());
+                .onItem().ifNull().continueWith(Response.status(Response.Status.PRECONDITION_FAILED).build());
     }
 
     @Path("{id}")
@@ -110,7 +110,7 @@ public class AccountResource extends RestResource {
     public Uni<Response> update(@RestPath("instance") Long instance, Long id, Account account) {
         return accountService.update(instance, id, account)
                 .onItem().ifNotNull().transform(acc -> Response.ok(acc).build())
-                .onItem().ifNull().continueWith(Response.ok().status(Response.Status.NOT_FOUND).build());
+                .onItem().ifNull().continueWith(Response.status(Response.Status.NOT_FOUND).build());
     }
 
     @Path("{id}")
@@ -119,8 +119,8 @@ public class AccountResource extends RestResource {
     public Uni<Response> delete(@RestPath("instance") Long instance, Long id) {
         return accountService.delete(instance, id)
                 .map(result -> result != null && result == 1L ?
-                        Response.ok().status(Response.Status.NO_CONTENT).build() :
-                        Response.ok().status(Response.Status.NOT_FOUND).build());
+                        Response.status(Response.Status.NO_CONTENT).build() :
+                        Response.status(Response.Status.NOT_FOUND).build());
     }
 
 }

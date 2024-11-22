@@ -38,7 +38,7 @@ public class AssociationResource extends RestResource {
                                    @RestQuery("size") @DefaultValue("20") int pageSize) {
 
         Sort sort = buildSort(sortQuery);
-        if (sort.getColumns().size() == 0)
+        if (sort.getColumns().isEmpty())
             sort.and("id");
         return associationService.list(instance, filter, sort, buildPage(pageIndex, pageSize));
     }

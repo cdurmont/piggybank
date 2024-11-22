@@ -25,12 +25,13 @@ public class TransactionService {
 
     @Inject EntryService entryService;
 
+    @ReactiveTransactional
     public Uni<Transaction> create(Long instanceId, Transaction newTxn) {
         newTxn.setDefaults();
         if (newTxn.instance == null)
             newTxn.instance = new Instance();
         newTxn.instance.id = instanceId;
-        return Panache.<Transaction>withTransaction(newTxn::persist)    // 1. create new Transaction
+        return newTxn.<Transaction>persist()    // 1. create new Transaction
                 .chain(txnDb -> {                                       // 2. create entries and link them to the Transaction
                     List<Uni<Entry>> unis = new ArrayList<>();
                     if (txnDb != null && txnDb.entries != null)

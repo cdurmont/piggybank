@@ -30,50 +30,19 @@ public class AssociationService {
     }
 
     public Uni<List<Association>> list(Long instanceId, Association filter, Sort sort, Page page) {
-
-        Map<String, Object> params = new HashMap<>();
-        String query ="1=1";
-        query+=" AND instance.id=:instance_id";
-        params.put("instance_id", instanceId);
-        if (filter != null) {
-            if (filter.id!= null) {
-                query+=" AND id=:id";
-                params.put("id", filter.id);
-            }
-            if (filter.regex!= null) {
-                query+=" AND regex LIKE :regex";
-                params.put("regex", "%"+filter.regex+"%");
-            }
-            if (filter.account!= null && filter.account.id != null) {
-                query+=" AND account.id=:account_id";
-                params.put("account_id", filter.account.id);
-            }
-        }
-        return Association.find(query, sort, params)
-                .list();
+        return Association.list(instanceId, filter, sort, page);
     }
 
     public Uni<Association> update(Long instanceId, Long id, Association association) {
         association.id = id;
-        return Panache.withTransaction(
-                () -> Association.<Association>findById(id)
-                        .map(associationDb -> {
-                            if (associationDb != null && associationDb.instance != null && !Objects.equals(instanceId, associationDb.instance.id))
-                                return null;
-                            try {
-                                BeanUtils.copyProperties(associationDb, association);
-                            } catch (IllegalAccessException | InvocationTargetException e) {
-                                Log.error("Error copying new properties of Association "+id, e);
-                                throw new RuntimeException(e);
-                            }
-                            return associationDb;
-                        })
-        );
+        if (association.instance == null)
+            association.instance = new Instance();
+        association.instance.id = instanceId;
+
+        return Panache.withTransaction(association::update);
     }
 
     public Uni<Long> delete(Long instanceId, Long id) {
-        return Panache.withTransaction(
-                () -> Association.delete("instance.id=:instance_id and id=:id", Parameters.with("instance_id",instanceId).and("id",id))
-        );
+        return Panache.withTransaction( () -> Association.delete(instanceId, id) );
     }
 }
